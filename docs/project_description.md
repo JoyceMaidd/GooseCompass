@@ -6,7 +6,7 @@
 
 ## Problem Statement
 
-University of Waterloo students participating in outbound exchange programs face fragmented and inconsistent access to critical information required for planning and completing exchange applications.
+Students at the University of Waterloo participating in overseas exchange programs face challenges such as time-consuming information gathering and fragmented information channels when obtaining the key information needed to plan and complete their exchange applications.
 
 Relevant information is distributed across:
 
