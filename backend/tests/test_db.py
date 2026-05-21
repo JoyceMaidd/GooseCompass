@@ -11,6 +11,7 @@ async def db_lifecycle():
     await disconnect()
 
 
+@pytest.mark.integration
 async def test_ping():
     """Connection succeeds and Atlas responds with ok: 1."""
     db = get_database()
