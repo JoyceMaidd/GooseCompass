@@ -10,39 +10,81 @@ Stack: FastAPI + MongoDB Atlas + PydanticAI + React/TypeScript + Docling + OpenA
 
 ## Development commands
 
-> Commands will be added here as the project is bootstrapped. Expected: `uvicorn` for the backend, `pytest` for tests, `npm`/`vite` for the frontend.
-
-Run a single test:
+**Backend setup:**
+```bash
+pip install -e ".[dev]"
 ```
+
+**Run backend server:**
+```bash
+uvicorn backend.api.app:app --reload
+```
+
+**Run all tests:**
+```bash
+pytest backend/tests/ -v
+```
+
+**Run a single test:**
+```bash
 pytest backend/tests/path/to/test_file.py::test_function_name -v
+```
+
+**CLI validation tools (built before the API layer):**
+```bash
+python scripts/ingest.py              # ingest all sources in scripts/sources.json
+python scripts/ingest.py --dry-run    # list sources without ingesting
+python scripts/validate_retrieval.py  # interactive retrieval quality check
+python scripts/validate_generation.py # interactive end-to-end pipeline check
+```
+
+**Frontend:**
+```bash
+cd frontend && npm run dev            # starts Vite dev server at localhost:5173
+```
+
+## Environment variables
+
+Copy `.env.example` → `.env` and fill in all values:
+
+```
+MONGODB_URI=
+MONGODB_DB_NAME=
+MONGODB_COLLECTION_CHUNKS=
+OPENAI_API_KEY=
+OPENROUTER_API_KEY=
+OPENROUTER_GENERATION_MODEL=
+OPENROUTER_REWRITER_MODEL=
+FRONTEND_ORIGIN=http://localhost:5173
+VITE_API_URL=http://localhost:8000
 ```
 
 ## Architecture
 
 ```
-goosecompass/
+GooseCompass/
 ├── backend/
-│   ├── ingestion/    # Docling pipeline: fetch → chunk → embed → store
-│   ├── retrieval/    # vector search + Atlas full-text search + RRF fusion
-│   ├── generation/   # PydanticAI structured response + citation schema
-│   ├── api/          # FastAPI routes, streaming delivery
-│   └── tests/        # mirrors source structure
-├── frontend/         # React + TypeScript chat UI, token streaming, citations
-├── scripts/          # CLI tools for retrieval validation (built before UI)
-├── docs/
-├── .env.example
-└── pyproject.toml
+│   ├── config.py         # pydantic-settings loader, single Settings instance
+│   ├── db.py             # async Motor client, lifespan-compatible open/close
+│   ├── ingestion/        # Docling pipeline: fetch → chunk → embed → store
+│   ├── retrieval/        # vector search + Atlas full-text search + RRF fusion
+│   ├── generation/       # PydanticAI structured response + citation schema
+│   ├── api/              # FastAPI routes, streaming delivery
+│   └── tests/            # mirrors source structure
+├── frontend/             # React + TypeScript chat UI, token streaming, citations
+├── scripts/              # CLI tools for ingestion and retrieval validation
+└── docs/                 # TASKS.md (phased build plan), architecture docs
 ```
 
 ### Retrieval pipeline (the core of the system)
 
 ```
 User query
-  → Query rewriter (LLM, improves recall for institutional terminology)
+  → Query rewriter (LLM via OpenRouter, improves recall for institutional terminology)
   → Parallel retrieval
       ├── MongoDB vector search (OpenAI text-embedding-3-small, top 20)
       └── MongoDB Atlas full-text search (top 20)
-  → Reciprocal Rank Fusion (RRF) merge
+  → Reciprocal Rank Fusion (RRF)
   → Top-10 context selection
   → PydanticAI response generator (structured answer + end-of-paragraph citations)
 ```
