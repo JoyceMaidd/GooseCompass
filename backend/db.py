@@ -15,6 +15,8 @@ async def connect() -> None:
         None
     """
     global _client
+    if _client is not None:
+        return
     _client = AsyncIOMotorClient(settings.mongodb_uri)
 
 
