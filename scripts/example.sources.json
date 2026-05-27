@@ -1,0 +1,4 @@
+[
+    { "type": "web", "url": "sourceurl" },
+    { "type": "pdf", "path": "documentpath" }
+]
