@@ -23,3 +23,7 @@ frontend/.vite/
 # Editors
 .idea/
 .vscode/
+
+# Source documents
+documents/
+sources.json
