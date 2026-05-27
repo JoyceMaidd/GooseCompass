@@ -24,5 +24,6 @@ frontend/.vite/
 .idea/
 .vscode/
 
-# Sorce documents
+# Source documents
 documents/
+sources.json
