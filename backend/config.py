@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     openrouter_api_key: str
     openrouter_generation_model: str
     openrouter_rewriter_model: str
+    frontend_origin: str
 
 
 settings = Settings()
