@@ -43,6 +43,13 @@ python scripts/validate_generation.py # interactive end-to-end pipeline check
 cd frontend && npm run dev            # starts Vite dev server at localhost:5173
 ```
 
+**API endpoints (backend must be running):**
+```
+GET  /health          health check
+POST /query           full RAG pipeline, returns GeneratedResponse JSON
+POST /query/stream    same pipeline, streams tokens via text/event-stream
+```
+
 ## Environment variables
 
 Copy `.env.example` → `.env` and fill in all values:
@@ -101,7 +108,6 @@ User query
 
 - **Strict grounding**: if retrieved context is insufficient, the system must say so. Never synthesize from model knowledge.
 - **Session-only state**: no persistent chat history (MVP). Conversation state lives in memory per session.
-- **Streaming deferred**: token streaming is a final-phase concern. Initial development uses CLI interaction for retrieval validation.
 - **Retrieval-first development order**: CLI validation → backend API → streaming frontend.
 
 ## Coding principles (enforce strictly)
