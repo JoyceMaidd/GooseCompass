@@ -512,7 +512,7 @@ Test: `tests/api/test_stream.py` — consume the stream; assert token events arr
 
 ### 4.4 `[CODE]` Configure CORS
 
-Allow the frontend origin (configurable via `FRONTEND_ORIGIN` env var, default `http://localhost:5173`). Add to `.env.example`.
+Allow the frontend origin (configurable via `FRONTEND_ORIGIN` env var, default `http://localhost:5174`). Add to `.env.example`.
 
 Test: `tests/api/test_cors.py` — send a preflight `OPTIONS` request; assert `Access-Control-Allow-Origin` header is present.
 
@@ -557,7 +557,7 @@ cd frontend && npm install
 
 Add `VITE_API_URL` to `.env.example` (default: `http://localhost:8000`).
 
-Test: `npm run dev` starts without errors; blank page loads at `localhost:5173`.
+Test: `npm run dev` starts without errors; blank page loads at `localhost:5174`.
 
 ---
 

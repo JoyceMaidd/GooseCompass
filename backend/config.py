@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     All fields are required — missing any will raise ValidationError at startup.
     """
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     mongodb_uri: str
     mongodb_db_name: str
