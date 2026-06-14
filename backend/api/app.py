@@ -32,6 +32,7 @@ app.add_middleware(
     allow_origins=[settings.frontend_origin],
     allow_methods=["*"],
     allow_headers=["*"],
+    allow_private_network=True,
 )
 
 app.include_router(query_router)
