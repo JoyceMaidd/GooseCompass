@@ -40,7 +40,7 @@ python scripts/validate_generation.py # interactive end-to-end pipeline check
 
 **Frontend:**
 ```bash
-cd frontend && npm run dev            # starts Vite dev server at localhost:5173
+cd frontend && npm run dev            # starts Vite dev server at localhost:5174
 ```
 
 **API endpoints (backend must be running):**
@@ -62,7 +62,7 @@ OPENAI_API_KEY=
 OPENROUTER_API_KEY=
 OPENROUTER_GENERATION_MODEL=
 OPENROUTER_REWRITER_MODEL=
-FRONTEND_ORIGIN=http://localhost:5173
+FRONTEND_ORIGIN=http://localhost:5174
 VITE_API_URL=http://localhost:8000
 ```
 
