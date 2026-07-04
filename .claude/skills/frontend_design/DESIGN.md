@@ -43,23 +43,6 @@ The system uses a clean humanist sans-serif (system-ui / Inter) throughout. Exce
 ### Principles
 Lora is only for the branding panel (left side). All chat panel text uses system-ui / Inter. Body text in messages uses weight 400 for both turns; bubble color differentiates speaker.
 
-## Layout
-
-### Spacing System
-- **Base unit:** 4px.
-- **Tokens:** `{spacing.xs}` 4px · `{spacing.sm}` 8px · `{spacing.md}` 12px · `{spacing.lg}` 16px · `{spacing.xl}` 24px · `{spacing.xxl}` 32px.
-- **Chat panel internal padding:** `{spacing.xl}` (24px) horizontal, `{spacing.lg}` (16px) vertical.
-- **Message bubble padding:** `{spacing.lg}` (16px) horizontal, `{spacing.md}` (12px) vertical.
-- **Message gap:** `{spacing.xl}` (24px) between consecutive turns.
-- **Header height:** 56px — compact but gives the status dot and "New Chat" button enough room.
-- **Input area padding:** `{spacing.lg}` (16px) all sides.
-
-### Grid & Container
-- **Two-panel split at desktop:** Left panel ~40% width (branding + illustration), right panel ~60% (chat). The split is not equal — the chat panel is wider.
-- **Chat panel max width:** ~720px. Centering it inside the right half keeps line lengths comfortable.
-- **Message bubbles:** AI bubbles left-aligned, max-width ~80% of chat panel. User bubbles right-aligned, max-width ~70%.
-- **Source bar:** full-width strip pinned at the very bottom of the chat card, below the disclaimer.
-
 ## Elevation & Depth
 
 | Level | Treatment | Use |
@@ -82,8 +65,6 @@ The elevation philosophy is **color + canvas contrast first**. The AI bubble rea
 | `{rounded.lg}` | 16px | AI and user message bubbles, chat panel container |
 | `{rounded.full}` | 9999px | Send button (circular), online status dot |
 
-### Illustration
-The brand illustration is a watercolor painting of a Canada goose (adult) and gosling standing on a globe, with soft watercolor clouds. Style: loose brush strokes, muted warm pigments, no hard outlines. It is the only illustration in the product — it appears only in the left branding panel and should never be tiled, scaled to icon size, or reproduced in dark contexts.
 
 ## Components
 
@@ -127,7 +108,6 @@ The brand illustration is a watercolor painting of a Canada goose (adult) and go
 - Show citation chips inline in AI response text — never footnote-only. The connection between claim and source must be visible in the message itself.
 - Keep the disclaimer visible at all times below the input. This is a non-negotiable transparency signal.
 - Use `{colors.primary}` (forest green) only on the wordmark and send button. Don't use it on interactive labels or body text in the chat panel.
-- Right-align user bubbles. Left-align AI bubbles. Never center either.
 
 ### Don't
 - Don't use pure white (`#ffffff`) as the canvas background. The cream is the brand's warmth signal.
@@ -136,10 +116,3 @@ The brand illustration is a watercolor painting of a Canada goose (adult) and go
 - Don't use the forest green (`{colors.primary}`) for message text in either bubble type — it creates ambiguity with citation-teal links.
 - Don't use a serif font for any element in the chat panel. The editorial warmth comes from canvas and illustration, not type.
 - Don't add hover effects to message bubbles. Only the send button and "New Chat" button have interactive states.
-
-## Responsive Behavior
-
-See `FRONTEND.md` for full breakpoint specs. Touch target minimums:
-- Send button: 40 × 40px.
-- New Chat button: min 36px height.
-- Citation chips are non-interactive on mobile; the source-bar link is the tappable target.
