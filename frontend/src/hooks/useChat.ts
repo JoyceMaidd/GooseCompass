@@ -8,6 +8,7 @@ import type { Message } from '../types'
  * @returns messages - Full chat history for this session.
  * @returns isLoading - True while a streaming response is in flight.
  * @returns sendMessage - Submit a query; streams the assistant reply token by token.
+ * @returns startNewChat - Clears the session, discarding all messages.
  */
 export function useChat() {
   const [messages, setMessages] = useState<Message[]>([])
@@ -51,5 +52,10 @@ export function useChat() {
     })
   }
 
-  return { messages, isLoading, sendMessage }
+  function startNewChat() {
+    setMessages([])
+    setIsLoading(false)
+  }
+
+  return { messages, isLoading, sendMessage, startNewChat }
 }

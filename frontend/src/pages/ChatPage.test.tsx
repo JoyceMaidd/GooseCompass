@@ -23,7 +23,7 @@ beforeEach(() => {
 
 describe('ChatPage', () => {
   it('renders the header and input', () => {
-    mockUseChat.mockReturnValue({ messages: [], isLoading: false, sendMessage: vi.fn() })
+    mockUseChat.mockReturnValue({ messages: [], isLoading: false, sendMessage: vi.fn(), startNewChat: vi.fn() })
     render(<ChatPage />)
     expect(screen.getByRole('heading', { name: /GooseCompass/i })).toBeInTheDocument()
     expect(screen.getByRole('textbox')).toBeInTheDocument()
@@ -31,7 +31,7 @@ describe('ChatPage', () => {
 
   it('calls sendMessage when user submits a query', async () => {
     const sendMessage = vi.fn()
-    mockUseChat.mockReturnValue({ messages: [], isLoading: false, sendMessage })
+    mockUseChat.mockReturnValue({ messages: [], isLoading: false, sendMessage, startNewChat: vi.fn() })
     render(<ChatPage />)
 
     await userEvent.type(screen.getByRole('textbox'), 'What GPA do I need?{Enter}')
@@ -47,6 +47,7 @@ describe('ChatPage', () => {
       ]),
       isLoading: false,
       sendMessage: vi.fn(),
+      startNewChat: vi.fn(),
     })
     render(<ChatPage />)
 
@@ -55,8 +56,18 @@ describe('ChatPage', () => {
   })
 
   it('disables input while isLoading is true', () => {
-    mockUseChat.mockReturnValue({ messages: [], isLoading: true, sendMessage: vi.fn() })
+    mockUseChat.mockReturnValue({ messages: [], isLoading: true, sendMessage: vi.fn(), startNewChat: vi.fn() })
     render(<ChatPage />)
     expect(screen.getByRole('textbox')).toBeDisabled()
+  })
+
+  it('calls startNewChat when the New Chat button is clicked', async () => {
+    const startNewChat = vi.fn()
+    mockUseChat.mockReturnValue({ messages: [], isLoading: false, sendMessage: vi.fn(), startNewChat })
+    render(<ChatPage />)
+
+    await userEvent.click(screen.getByRole('button', { name: /New Chat/i }))
+
+    expect(startNewChat).toHaveBeenCalledOnce()
   })
 })
