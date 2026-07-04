@@ -4,6 +4,13 @@ A RAG-based AI assistant for University of Waterloo outbound exchange students. 
 
 **Strict grounding rule:** the system only answers from retrieved institutional documents. It never synthesizes from general LLM knowledge. If the retrieved context is insufficient, it says so.
 
+## Demo
+
+
+https://github.com/user-attachments/assets/0abeff0b-f22f-457f-8b15-180e1a462644
+
+
+
 ## Stack
 
 | Layer | Technology |
