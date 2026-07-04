@@ -76,4 +76,21 @@ describe('useChat', () => {
 
     expect(result.current.isLoading).toBe(false)
   })
+
+  it('clears messages and isLoading when startNewChat is called', async () => {
+    mockQueryStreaming.mockResolvedValue(undefined)
+
+    const { result } = renderHook(() => useChat())
+    await act(async () => {
+      result.current.sendMessage('What GPA do I need?')
+    })
+    expect(result.current.messages).toHaveLength(2)
+
+    act(() => {
+      result.current.startNewChat()
+    })
+
+    expect(result.current.messages).toEqual([])
+    expect(result.current.isLoading).toBe(false)
+  })
 })
