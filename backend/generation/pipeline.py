@@ -5,6 +5,10 @@ from backend.generation.models import CitedParagraph, GeneratedResponse
 from backend.generation.prompt import build_prompt
 from backend.retrieval.models import SearchResult
 
+_INSUFFICIENT_CONTEXT_MESSAGE = (
+    "The current context is insufficient to answer the question."
+)
+
 
 def _resolve_citations(
     response: GeneratedResponse, chunks: list[SearchResult]
@@ -35,6 +39,9 @@ def _resolve_citations(
                 seen.add(url)
                 urls.append(url)
         resolved.append(CitedParagraph(text=para.text, citations=urls))
+
+    if response.insufficient_context and not resolved:
+        resolved.append(CitedParagraph(text=_INSUFFICIENT_CONTEXT_MESSAGE, citations=[]))
 
     return GeneratedResponse(paragraphs=resolved, insufficient_context=response.insufficient_context)
 
