@@ -70,6 +70,27 @@ def test_resolve_citations_url_passthrough():
     resolved = _resolve_citations(raw, chunks)
     assert resolved.paragraphs[0].citations == ["https://other.com/page"]
 
+def test_resolve_citations_insufficient_context_empty_paragraphs_gets_fallback():
+    chunks = [_make_chunk(1, "https://example.com/x")]
+    raw = GeneratedResponse(paragraphs=[], insufficient_context=True)
+    resolved = _resolve_citations(raw, chunks)
+    assert len(resolved.paragraphs) == 1
+    assert resolved.paragraphs[0].text
+    assert resolved.paragraphs[0].citations == []
+    assert resolved.insufficient_context is True
+
+
+def test_resolve_citations_insufficient_context_with_paragraphs_unchanged():
+    chunks = [_make_chunk(1, "https://example.com/x")]
+    raw = GeneratedResponse(
+        paragraphs=[CitedParagraph(text="I don't know.", citations=[])],
+        insufficient_context=True,
+    )
+    resolved = _resolve_citations(raw, chunks)
+    assert len(resolved.paragraphs) == 1
+    assert resolved.paragraphs[0].text == "I don't know."
+
+
 _QUERY = "What GPA do I need to apply for exchange?"
 
 
