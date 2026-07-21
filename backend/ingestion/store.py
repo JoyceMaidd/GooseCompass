@@ -33,3 +33,21 @@ async def upsert_chunks(chunks: list[Chunk], collection: AsyncIOMotorCollection)
 
     result = await collection.bulk_write(operations, ordered=False)
     return result.upserted_count + result.modified_count
+
+
+async def prune_stale_chunks(
+    current_urls: set[str], collection: AsyncIOMotorCollection
+) -> int:
+    """Delete chunks whose source_url is no longer among the current sources.
+
+    Args:
+        current_urls: Every ``url``/``path`` value present in the current
+            sources list; chunks from any other source_url are considered
+            stale and removed.
+        collection: Motor collection to delete from.
+
+    Returns:
+        Number of documents deleted.
+    """
+    result = await collection.delete_many({"source_url": {"$nin": list(current_urls)}})
+    return result.deleted_count
