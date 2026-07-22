@@ -35,9 +35,9 @@ export function ChatPage() {
       <main className="chat-page__messages">
         {messages.length === 0 ? (
           <div className="chat-page__empty">
-            <p className="chat-page__empty-title">Ask anything about your UWaterloo outbound exchange.</p>
+            <p className="chat-page__empty-title">Ask anything about your UWaterloo exchange</p>
             <p className="chat-page__empty-subtitle">
-              Answers are grounded in official Waterloo exchange documents, with citations.
+              Start your journey here
             </p>
           </div>
         ) : (
