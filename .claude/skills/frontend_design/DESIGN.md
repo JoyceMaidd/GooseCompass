@@ -15,7 +15,7 @@
 - **Ink** (`{colors.ink}` — #39483E): Headlines primary, and secondary text in the branding panel. Dark forest, slightly off-black.
 - **Body** (`{colors.body}` — #2D2D2E): Text in conversation.
 - **Muted** (`{colors.muted}` — #999DA0): Timestamp labels, disclaimer text. Sub-information, never competes with message content.
-- **Citation Text** (`{colors.citation-text}` — #8DA9A7): Inline `[1]` chip labels and source attribution links.
+- **Citation Text** (`{colors.citation-text}` — #8DA9A7): Inline citation pill labels and source attribution links.
 
 ### Semantic
 - **Success** (`{colors.success}` — #4ade80): Online status dot.
@@ -34,11 +34,13 @@ The system uses a clean humanist sans-serif (system-ui / Inter) throughout. Exce
 | `{typography.chat-header}` | 16px | 600 | 1.2 | 0 | "GooseCompass" label in the chat panel header |
 | `{typography.message}` | 15px | 400 | 1.55 | 0 | Message body text in both bubbles |
 | `{typography.timestamp}` | 12px | 400 | 1.4 | 0 | Time labels below messages |
-| `{typography.citation-chip}` | 12px | 500 | 1.0 | 0 | Inline `[1]` citation number inside a chip |
-| `{typography.source-label}` | 13px | 400 | 1.4 | 0 | Source attribution line at the bottom of the chat panel |
+| `{typography.citation-chip}` | 13px | 500 | 1.0 | 0 | Citation pill label (source title, or "title +N") |
+| `{typography.source-label}` | 13px | 500 | 1.4 | 0 | Source title inside a citation popover's `citation-item` row |
 | `{typography.disclaimer}` | 12px | 400 | 1.4 | 0 | "GooseCompass may make mistakes…" line |
 | `{typography.button-label}` | 13px | 500 | 1.0 | 0 | "New Chat +" button label |
 | `{typography.input-placeholder}` | 15px | 400 | 1.55 | 0 | "Ask anything about exchange at Waterloo…" |
+| `{typography.empty-title}` | 20px | 600 | 1.4 | 0 | Landing hero title, "Ask anything about your UWaterloo exchange" |
+| `{typography.empty-subtitle}` | 14px | 400 | 1.4 | 0 | Landing hero subtitle, "Start your journey here" |
 
 ### Principles
 Lora is only for the branding panel (left side). All chat panel text uses system-ui / Inter. Body text in messages uses weight 400 for both turns; bubble color differentiates speaker.
@@ -61,9 +63,9 @@ The elevation philosophy is **color + canvas contrast first**. The AI bubble rea
 | Token | Value | Use |
 |---|---|---|
 | `{rounded.sm}` | 8px | "New Chat" button, input field |
-| `{rounded.md}` | 12px | Citation chip, source bar |
+| `{rounded.md}` | 12px | Citation popover panel |
 | `{rounded.lg}` | 16px | AI and user message bubbles, chat panel container |
-| `{rounded.full}` | 9999px | Send button (circular), online status dot |
+| `{rounded.full}` | 9999px | Send button (circular), online status dot, citation pill, hero question pill |
 
 
 ## Components
@@ -80,15 +82,21 @@ The elevation philosophy is **color + canvas contrast first**. The AI bubble rea
 
 ### Message Bubbles
 
-**`bubble-ai`** — Left-aligned card. Background `{colors.bubble-ai}` (#F8F8F0), text `{colors.body}` (#2D2D2E), `{typography.message}`, padding 12px × 16px, `{rounded.lg}` (16px), soft drop shadow `0 1px 4px rgba(0,0,0,0.08)`. Inline citation chips appear inside the bubble text flow. A timestamp in `{typography.timestamp}` and `{colors.muted}` sits below the bubble, left-aligned.
+**`bubble-ai`** — Left-aligned card. Background `{colors.bubble-ai}` (#F8F8F0), text `{colors.body}` (#2D2D2E), `{typography.message}`, padding 12px × 16px, `{rounded.lg}` (16px), soft drop shadow `0 1px 4px rgba(0,0,0,0.08)`. Inline citation pills appear inside the bubble text flow. A timestamp in `{typography.timestamp}` and `{colors.muted}` sits below the bubble, left-aligned.
 
 **`bubble-user`** — Right-aligned card. Background `{colors.bubble-user}` (#E7F1F1), text `{colors.body}` (#2D2D2E), same padding, radius, and shadow as `bubble-ai`. Timestamp sits below, right-aligned.
 
+### Landing Hero
+
+**`hero-question-pill`** — Example-question chip shown beneath the landing subtitle, before any conversation starts. Background `{colors.bubble-ai}` (#F8F8F0), 1px `{colors.hairline}` border, text `{colors.ink}`, `{rounded.full}` (9999px), padding 8px × 16px, `{typography.button-label}` scale (13px/500). Unlike message bubbles, this is a real interactive button: on hover it takes a light `{colors.citation-bg}` tint and the AI-bubble elevation shadow (`0 1px 4px rgba(0,0,0,0.08)`). Clicking a pill sends its question immediately.
+
+**`suggested-questions-marquee`** — Two `hero-question-pill` rows drifting slowly and continuously in opposite directions (one leftward, one rightward), each row pausing on hover so a pill can be read and clicked without drifting away. The row edges fade via a mask-image gradient rather than clipping abruptly. Motion is disabled under `prefers-reduced-motion: reduce`.
+
 ### Citation Elements
 
-**`citation-chip`** — Inline element inside AI bubble text. Small rounded chip: `[1]` number in `{typography.citation-chip}`, background a light teal tint (~#d6eaf2), text `{colors.citation-text}`, `{rounded.md}` (12px), padding 1px × 6px. Appears immediately after the cited sentence, inline.
+**`citation-pill`** — Inline element at the end of a cited paragraph. A single citation renders as a direct link styled as a small rounded pill; multiple citations render as a "first title +N" trigger. Background `{colors.citation-bg}` (#d6eaf2), text `{colors.citation-text}`, `{rounded.full}` (999px), padding 4px × 10px, `{typography.citation-chip}`, includes a small document icon. Opens a `citation-popover` on **both** hover and keyboard focus.
 
-**`source-bar`** — A full-width strip pinned at the **very bottom** of the chat card, below the disclaimer. Light background (slightly darker cream). Numbered source entries: `[1]` index + hyperlinked document title in `{colors.citation-text}` + external link icon (↗). `{typography.source-label}`. Multiple sources stack vertically.
+**`citation-popover`** — Floating panel anchored above or below its trigger pill depending on available viewport space (300px wide, scrolls internally past 320px tall). `{rounded.md}` (12px), `{colors.surface-input}` background, `{colors.hairline}` border, elevated shadow `0 4px 16px rgba(0,0,0,0.12)`. Entrance animation: 180ms ease-out, opacity + a small `translateY` (6px from the side it emerges from). Lists every source as a `citation-item` — document icon, full title, snippet, and a "View source →" link — never truncated or abbreviated. An invisible hover-bridge spacer between the pill and the panel keeps the popover open while the cursor crosses the gap.
 
 ### Input Area
 
@@ -105,14 +113,14 @@ The elevation philosophy is **color + canvas contrast first**. The AI bubble rea
 ### Do
 - Keep the branding panel free of interactive elements. It is an illustration canvas only.
 - Use the Canada goose illustration as the sole decorative asset. No abstract shapes, gradients, or pattern fills.
-- Show citation chips inline in AI response text — never footnote-only. The connection between claim and source must be visible in the message itself.
+- Show citation pills inline in AI response text — never footnote-only. The connection between claim and source must be visible in the message itself.
 - Keep the disclaimer visible at all times below the input. This is a non-negotiable transparency signal.
 - Use `{colors.primary}` (forest green) only on the wordmark and send button. Don't use it on interactive labels or body text in the chat panel.
 
 ### Don't
 - Don't use pure white (`#ffffff`) as the canvas background. The cream is the brand's warmth signal.
 - Don't introduce a second illustration or decorative image. One watercolor asset is the rule.
-- Don't hide or abbreviate the source bar when citations exist. Full document titles with external-link icons are required.
+- Don't make a citation's sources reveal on click-only. Both hover **and** keyboard focus must open the popover, and it must list full document titles — never truncated or abbreviated.
 - Don't use the forest green (`{colors.primary}`) for message text in either bubble type — it creates ambiguity with citation-teal links.
 - Don't use a serif font for any element in the chat panel. The editorial warmth comes from canvas and illustration, not type.
-- Don't add hover effects to message bubbles. Only the send button and "New Chat" button have interactive states.
+- Don't add hover effects to message bubbles. Interactive states are reserved for actual controls — the send button, "New Chat" button, citation pills, and hero question pills.
