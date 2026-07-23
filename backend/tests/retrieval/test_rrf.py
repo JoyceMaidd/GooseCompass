@@ -4,13 +4,14 @@ from backend.retrieval.models import SearchResult
 from backend.retrieval.rrf import reciprocal_rank_fusion
 
 
-def _make_result(chunk_id: str, score: float = 1.0) -> SearchResult:
+def _make_result(chunk_id: str, score: float = 1.0, document_type: str = "web") -> SearchResult:
     return SearchResult(
         chunk_id=chunk_id,
         content=f"Content for {chunk_id}",
         source_url="https://example.com",
         document_title="Test Doc",
         section_title="Section",
+        document_type=document_type,
         score=score,
     )
 
@@ -72,8 +73,9 @@ class TestReciprocalRankFusion:
         assert result[0].chunk_id == "c1"
 
     def test_metadata_preserved(self):
-        a = [_make_result("c1")]
+        a = [_make_result("c1", document_type="pdf")]
         b = []
         result = reciprocal_rank_fusion(a, b)
         assert result[0].content == "Content for c1"
         assert result[0].source_url == "https://example.com"
+        assert result[0].document_type == "pdf"

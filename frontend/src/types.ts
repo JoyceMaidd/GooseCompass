@@ -1,7 +1,16 @@
-/** A single response paragraph with its supporting source URLs. */
+/** A single structured citation supporting a paragraph's claims. */
+export interface Citation {
+  id: string
+  title: string
+  url?: string
+  snippet?: string
+  source_type?: string
+}
+
+/** A single response paragraph with its supporting citations. */
 export interface CitedParagraph {
   text: string
-  citations: string[]
+  citations: Citation[]
 }
 
 /** Structured LLM response with paragraph-level citations. */

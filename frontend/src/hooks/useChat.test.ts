@@ -2,6 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useChat } from './useChat'
 import * as client from '../api/client'
+import type { Citation } from '../types'
+
+const CITATION_ONE: Citation = { id: 'one', title: 'Source One', url: 'https://uwaterloo.ca/one' }
+const CITATION_TWO: Citation = { id: 'two', title: 'Source Two', url: 'https://uwaterloo.ca/two' }
+const CITATION_GPA: Citation = { id: 'gpa', title: 'GPA Requirements', url: 'https://uwaterloo.ca/gpa' }
 
 vi.mock('../api/client')
 
@@ -34,9 +39,9 @@ describe('useChat', () => {
 
   it('sets isLoading true while streaming, false when done', async () => {
     let resolveDone!: () => void
-    mockQueryStreaming.mockImplementation(async (_query, _onToken, onDone) => {
+    mockQueryStreaming.mockImplementation(async (_query, _onToken, _onParagraphEnd, onDone) => {
       await new Promise<void>(resolve => { resolveDone = resolve })
-      onDone([])
+      onDone()
     })
 
     const { result } = renderHook(() => useChat())
@@ -49,11 +54,12 @@ describe('useChat', () => {
   })
 
   it('accumulates tokens into the assistant message', async () => {
-    mockQueryStreaming.mockImplementation(async (_query, onToken, onDone) => {
+    mockQueryStreaming.mockImplementation(async (_query, onToken, onParagraphEnd, onDone) => {
       onToken('You ')
       onToken('need ')
       onToken('70%')
-      onDone(['https://uwaterloo.ca/gpa'])
+      onParagraphEnd([CITATION_GPA])
+      onDone()
     })
 
     const { result } = renderHook(() => useChat())
@@ -63,7 +69,47 @@ describe('useChat', () => {
 
     const assistant = result.current.messages[1]
     expect(assistant.paragraphs[0].text).toBe('You need 70%')
-    expect(assistant.paragraphs[0].citations).toEqual(['https://uwaterloo.ca/gpa'])
+    expect(assistant.paragraphs[0].citations).toEqual([CITATION_GPA])
+  })
+
+  it('starts a new paragraph after paragraph_end and accumulates independently', async () => {
+    mockQueryStreaming.mockImplementation(async (_query, onToken, onParagraphEnd, onDone) => {
+      onToken('First ')
+      onToken('idea.')
+      onParagraphEnd([CITATION_ONE])
+      onToken('Second ')
+      onToken('idea.')
+      onParagraphEnd([CITATION_TWO])
+      onDone()
+    })
+
+    const { result } = renderHook(() => useChat())
+    await act(async () => {
+      result.current.sendMessage('multi-part question')
+    })
+
+    const assistant = result.current.messages[1]
+    expect(assistant.paragraphs).toHaveLength(2)
+    expect(assistant.paragraphs[0].text).toBe('First idea.')
+    expect(assistant.paragraphs[0].citations).toEqual([CITATION_ONE])
+    expect(assistant.paragraphs[1].text).toBe('Second idea.')
+    expect(assistant.paragraphs[1].citations).toEqual([CITATION_TWO])
+  })
+
+  it('does not leave a dangling empty trailing paragraph after the stream ends', async () => {
+    mockQueryStreaming.mockImplementation(async (_query, onToken, onParagraphEnd, onDone) => {
+      onToken('Only idea.')
+      onParagraphEnd([CITATION_ONE])
+      onDone()
+    })
+
+    const { result } = renderHook(() => useChat())
+    await act(async () => {
+      result.current.sendMessage('single-part question')
+    })
+
+    const assistant = result.current.messages[1]
+    expect(assistant.paragraphs).toHaveLength(1)
   })
 
   it('sets isLoading false on streaming error', async () => {

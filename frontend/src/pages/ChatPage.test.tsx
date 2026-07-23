@@ -43,7 +43,15 @@ describe('ChatPage', () => {
     mockUseChat.mockReturnValue({
       messages: makeMessages([
         { role: 'user', paragraphs: [{ text: 'What GPA?', citations: [] }] },
-        { role: 'assistant', paragraphs: [{ text: 'You need 70%.', citations: ['https://uwaterloo.ca'] }] },
+        {
+          role: 'assistant',
+          paragraphs: [
+            {
+              text: 'You need 70%.',
+              citations: [{ id: 'uw', title: 'UWaterloo', url: 'https://uwaterloo.ca' }],
+            },
+          ],
+        },
       ]),
       isLoading: false,
       sendMessage: vi.fn(),

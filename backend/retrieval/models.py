@@ -12,6 +12,7 @@ class SearchResult(BaseModel):
         source_url: URL or file path of the originating document.
         document_title: Title of the source document.
         section_title: Title of the section containing this chunk.
+        document_type: Either "web" or "pdf".
         score: Relevance score (higher is more relevant).
     """
 
@@ -20,4 +21,5 @@ class SearchResult(BaseModel):
     source_url: str
     document_title: str
     section_title: str
+    document_type: str
     score: float

@@ -10,7 +10,9 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 from backend.api.app import app
+from backend.api.routes.query import _stream_response
 from backend.db import connect, disconnect
+from backend.generation.models import Citation, CitedParagraph, GeneratedResponse
 
 
 @pytest.fixture(autouse=True)
@@ -50,8 +52,8 @@ async def test_stream_returns_200():
 
 
 @pytest.mark.asyncio
-async def test_stream_token_events_before_citations():
-    """Token events must arrive before the final citations event."""
+async def test_stream_paragraph_end_events_follow_tokens():
+    """Each paragraph's token events must be followed by a paragraph_end event."""
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         response = await client.post(
             "/query/stream",
@@ -60,9 +62,82 @@ async def test_stream_token_events_before_citations():
         )
     events = _parse_sse(response.text)
 
-    assert events[-1]["type"] == "citations"
-    token_events = [e for e in events[:-1] if e["type"] == "token"]
+    assert events[-1]["type"] == "paragraph_end"
+    assert not any(e["type"] == "citations" for e in events)
+    token_events = [e for e in events if e["type"] == "token"]
     assert len(token_events) >= 1
+
+
+@pytest.mark.asyncio
+async def test_stream_response_paragraph_end_count_matches_paragraphs():
+    """_stream_response must emit one paragraph_end event per paragraph, in order."""
+    response = GeneratedResponse(
+        paragraphs=[
+            CitedParagraph(
+                text="First idea.",
+                citations=[Citation(id="a", title="A", url="https://a.example")],
+            ),
+            CitedParagraph(
+                text="Second idea.",
+                citations=[
+                    Citation(id="b", title="B", url="https://b.example"),
+                    Citation(id="c", title="C", url="https://c.example"),
+                ],
+            ),
+        ]
+    )
+
+    events = [json.loads(raw[len("data: "):].strip()) async for raw in _stream_response(response)]
+
+    paragraph_ends = [e for e in events if e["type"] == "paragraph_end"]
+    assert len(paragraph_ends) == 2
+    assert [c["id"] for c in paragraph_ends[0]["citations"]] == ["a"]
+    assert [c["id"] for c in paragraph_ends[1]["citations"]] == ["b", "c"]
+    assert events[-1]["type"] == "paragraph_end"
+
+
+@pytest.mark.asyncio
+async def test_stream_response_dedupes_citations_per_paragraph():
+    """Duplicate citations within a paragraph must be deduped in paragraph_end."""
+    response = GeneratedResponse(
+        paragraphs=[
+            CitedParagraph(
+                text="Some text.",
+                citations=[
+                    Citation(id="a", title="A", url="https://a.example"),
+                    Citation(id="a", title="A", url="https://a.example"),
+                    Citation(id="b", title="B", url="https://b.example"),
+                ],
+            ),
+        ]
+    )
+
+    events = [json.loads(raw[len("data: "):].strip()) async for raw in _stream_response(response)]
+
+    paragraph_ends = [e for e in events if e["type"] == "paragraph_end"]
+    assert [c["id"] for c in paragraph_ends[0]["citations"]] == ["a", "b"]
+
+
+@pytest.mark.asyncio
+async def test_stream_response_citation_shape_omits_none_fields():
+    """paragraph_end citations must omit unset optional fields, not send them as null."""
+    response = GeneratedResponse(
+        paragraphs=[
+            CitedParagraph(
+                text="Some text.",
+                citations=[Citation(id="a", title="A")],
+            ),
+        ]
+    )
+
+    events = [json.loads(raw[len("data: "):].strip()) async for raw in _stream_response(response)]
+
+    paragraph_ends = [e for e in events if e["type"] == "paragraph_end"]
+    citation = paragraph_ends[0]["citations"][0]
+    assert citation == {"id": "a", "title": "A"}
+    assert "url" not in citation
+    assert "snippet" not in citation
+    assert "source_type" not in citation
 
 
 @pytest.mark.asyncio

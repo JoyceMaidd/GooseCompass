@@ -42,4 +42,7 @@ async def test_query_response_has_paragraphs():
     body = response.json()
     assert len(body["paragraphs"]) >= 1
     assert body["paragraphs"][0]["text"].strip() != ""
-    assert len(body["paragraphs"][0]["citations"]) >= 1
+    citations = body["paragraphs"][0]["citations"]
+    assert len(citations) >= 1
+    assert "id" in citations[0]
+    assert "title" in citations[0]

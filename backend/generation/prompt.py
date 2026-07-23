@@ -7,7 +7,16 @@ _SYSTEM_INSTRUCTION = (
     "Answer the user's question using ONLY the context provided below. "
     "If the context is insufficient to answer the question, say so explicitly — "
     "do not draw on outside knowledge. "
-    "After each paragraph, cite the source URLs that support the claims in that paragraph."
+    "When the answer covers more than one point, break it into multiple concise "
+    "paragraphs, one idea per paragraph. "
+    "Each paragraph has a separate text field and citations field. The text field "
+    "must contain ONLY prose — never include reference numbers, brackets, or "
+    "parentheses citing sources anywhere in the text, and never end a sentence or "
+    "paragraph with something like '(1)' or '(supporting point from 9)'. Instead, "
+    "put the numbers of the context items that support that paragraph in the "
+    "separate citations field, using only the bracketed number shown before each "
+    "context item (for example: 1, 2). Never write out a source's URL or title, "
+    "and never cite a source that is not listed in the context below."
 )
 
 
