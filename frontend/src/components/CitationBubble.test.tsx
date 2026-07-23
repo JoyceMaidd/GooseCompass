@@ -33,6 +33,7 @@ describe('CitationBubble', () => {
 
     fireEvent.mouseEnter(bubble)
     expect(screen.getByRole('region', { name: 'Sources' })).toBeInTheDocument()
+    expect(container.querySelector('.citation-bubble__hover-bridge')).not.toBeNull()
 
     fireEvent.mouseLeave(bubble)
     expect(screen.queryByRole('region', { name: 'Sources' })).toBeNull()
