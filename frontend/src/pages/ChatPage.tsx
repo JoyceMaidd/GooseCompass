@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { ChatInput } from '../components/ChatInput'
 import { ChatMessage } from '../components/ChatMessage'
+import { SuggestedQuestions } from '../components/SuggestedQuestions'
 import { useChat } from '../hooks/useChat'
 
 /**
@@ -39,6 +40,7 @@ export function ChatPage() {
             <p className="chat-page__empty-subtitle">
               Start your journey here
             </p>
+            <SuggestedQuestions onSelect={sendMessage} />
           </div>
         ) : (
           <div className="chat-page__thread">

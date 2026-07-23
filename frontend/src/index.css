@@ -116,7 +116,8 @@ button {
 
 .chat-page__empty {
   margin: auto;
-  max-width: 480px;
+  width: 100%;
+  max-width: 640px;
   text-align: center;
 }
 
@@ -131,6 +132,94 @@ button {
   font-size: 14px;
   color: var(--color-muted);
   margin: 0;
+}
+
+/* Suggested questions marquee */
+
+.suggested-questions {
+  margin-top: 24px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 48px,
+    #000 calc(100% - 48px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 48px,
+    #000 calc(100% - 48px),
+    transparent 100%
+  );
+}
+
+.suggested-questions__row {
+  overflow: hidden;
+}
+
+.suggested-questions__track {
+  display: inline-flex;
+  gap: 10px;
+  width: max-content;
+}
+
+.suggested-questions__track--left {
+  animation: suggested-questions-marquee-left 42s linear infinite;
+}
+
+.suggested-questions__track--right {
+  animation: suggested-questions-marquee-right 38s linear infinite;
+}
+
+.suggested-questions__row:hover .suggested-questions__track {
+  animation-play-state: paused;
+}
+
+@keyframes suggested-questions-marquee-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes suggested-questions-marquee-right {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .suggested-questions__track--left,
+  .suggested-questions__track--right {
+    animation: none;
+  }
+}
+
+.suggested-questions__pill {
+  flex-shrink: 0;
+  background-color: var(--color-bubble-ai);
+  border: 1px solid var(--color-hairline);
+  color: var(--color-ink);
+  border-radius: 9999px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.suggested-questions__pill:hover {
+  background-color: var(--color-citation-bg);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
 .chat-page__thread {
