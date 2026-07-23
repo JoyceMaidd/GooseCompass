@@ -45,6 +45,7 @@ async def vector_search(
                 "source_url": 1,
                 "document_title": 1,
                 "section_title": 1,
+                "document_type": 1,
                 "score": {"$meta": "vectorSearchScore"},
             }
         },

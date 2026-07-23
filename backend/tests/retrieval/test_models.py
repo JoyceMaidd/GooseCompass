@@ -13,6 +13,7 @@ def _make_result(**overrides) -> dict:
         "source_url": "https://uwaterloo.ca/exchange",
         "document_title": "Exchange Program Guide",
         "section_title": "Eligibility",
+        "document_type": "web",
         "score": 0.92,
     }
     return {**base, **overrides}
@@ -31,7 +32,14 @@ class TestSearchResult:
         assert isinstance(result.source_url, str)
         assert isinstance(result.document_title, str)
         assert isinstance(result.section_title, str)
+        assert isinstance(result.document_type, str)
         assert isinstance(result.score, float)
+
+    def test_missing_document_type_raises(self):
+        params = _make_result()
+        del params["document_type"]
+        with pytest.raises(ValidationError):
+            SearchResult(**params)
 
     def test_score_as_int_coerces_to_float(self):
         result = SearchResult(**_make_result(score=1))

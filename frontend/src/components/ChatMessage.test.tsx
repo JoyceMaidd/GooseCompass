@@ -6,11 +6,16 @@ import type { CitedParagraph } from '../types'
 const PARAGRAPHS: CitedParagraph[] = [
   {
     text: 'You need a minimum cumulative GPA of 70%.',
-    citations: ['https://uwaterloo.ca/gpa-requirements'],
+    citations: [
+      { id: 'gpa', title: 'GPA Requirements', url: 'https://uwaterloo.ca/gpa-requirements' },
+    ],
   },
   {
     text: 'ETH Zurich has its own admission criteria.',
-    citations: ['https://uwaterloo.ca/eth-zurich'],
+    citations: [
+      { id: 'eth-1', title: 'ETH Zurich Guide', url: 'https://uwaterloo.ca/eth-zurich' },
+      { id: 'eth-2', title: 'ETH Admissions', url: 'https://ethz.ch/admissions' },
+    ],
   },
 ]
 
@@ -21,25 +26,29 @@ describe('ChatMessage — assistant role', () => {
     expect(screen.getByText(/ETH Zurich has its own/)).toBeInTheDocument()
   })
 
-  it('renders citation links for each paragraph', () => {
+  it('renders a single citation as a direct link', () => {
     render(<ChatMessage paragraphs={PARAGRAPHS} role="assistant" />)
-    const links = screen.getAllByRole('link')
-    expect(links).toHaveLength(2)
-    expect(links[0]).toHaveAttribute('href', 'https://uwaterloo.ca/gpa-requirements')
-    expect(links[1]).toHaveAttribute('href', 'https://uwaterloo.ca/eth-zurich')
+    const link = screen.getByRole('link', { name: /GPA Requirements/ })
+    expect(link).toHaveAttribute('href', 'https://uwaterloo.ca/gpa-requirements')
+    expect(link).toHaveAttribute('target', '_blank')
   })
 
-  it('renders citation links in superscript elements', () => {
-    const { container } = render(<ChatMessage paragraphs={PARAGRAPHS} role="assistant" />)
-    const sups = container.querySelectorAll('sup')
-    expect(sups).toHaveLength(2)
+  it('renders multiple citations as a button trigger with a +N count', () => {
+    render(<ChatMessage paragraphs={PARAGRAPHS} role="assistant" />)
+    expect(screen.getByRole('button', { name: /ETH Zurich Guide \+1/ })).toBeInTheDocument()
   })
 
-  it('opens citation links in a new tab', () => {
-    render(<ChatMessage paragraphs={PARAGRAPHS} role="assistant" />)
-    for (const link of screen.getAllByRole('link')) {
-      expect(link).toHaveAttribute('target', '_blank')
-    }
+  it('does not render a paragraph with empty text', () => {
+    const withTrailingEmpty: CitedParagraph[] = [...PARAGRAPHS, { text: '', citations: [] }]
+    const { container } = render(<ChatMessage paragraphs={withTrailingEmpty} role="assistant" />)
+    expect(container.querySelectorAll('p')).toHaveLength(2)
+  })
+
+  it('renders no citation control when a paragraph has no citations', () => {
+    const noCitations: CitedParagraph[] = [{ text: 'Plain statement.', citations: [] }]
+    render(<ChatMessage paragraphs={noCitations} role="assistant" />)
+    expect(screen.queryByRole('link')).toBeNull()
+    expect(screen.queryByRole('button')).toBeNull()
   })
 })
 
@@ -52,7 +61,10 @@ describe('ChatMessage — user role', () => {
 
   it('does not render citation links for user messages', () => {
     const userParagraphs: CitedParagraph[] = [
-      { text: 'What GPA do I need?', citations: ['https://should-not-appear.com'] },
+      {
+        text: 'What GPA do I need?',
+        citations: [{ id: 'x', title: 'Should not appear', url: 'https://should-not-appear.com' }],
+      },
     ]
     render(<ChatMessage paragraphs={userParagraphs} role="user" />)
     expect(screen.queryByRole('link')).toBeNull()

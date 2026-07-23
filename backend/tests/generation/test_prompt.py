@@ -11,6 +11,7 @@ def _make_chunk(i: int) -> SearchResult:
         source_url=f"https://example.com/doc{i}",
         document_title=f"Document {i}",
         section_title=f"Section {i}",
+        document_type="web",
         score=1.0,
     )
 

@@ -1,4 +1,4 @@
-import type { GeneratedResponse } from '../types'
+import type { Citation, GeneratedResponse } from '../types'
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 
@@ -19,19 +19,23 @@ export async function queryNonStreaming(query: string): Promise<GeneratedRespons
 }
 
 /**
- * Send a query and stream the response token-by-token via SSE.
+ * Send a query and stream the response paragraph-by-paragraph via SSE.
  *
- * Calls `onToken` for each arriving word and `onDone` once with the full
- * deduplicated citation list from the final SSE event.
+ * Calls `onToken` for each arriving word within the current paragraph,
+ * `onParagraphEnd` once per paragraph with that paragraph's citations, and
+ * `onDone` once the underlying stream has fully closed.
  *
  * @param query - The user's natural-language question.
  * @param onToken - Called with each text token as it arrives.
- * @param onDone - Called once with all citation URLs when the stream ends.
+ * @param onParagraphEnd - Called with a paragraph's citations when that
+ *   paragraph finishes streaming.
+ * @param onDone - Called once, with no arguments, when the stream ends.
  */
 export async function queryStreaming(
   query: string,
   onToken: (token: string) => void,
-  onDone: (citations: string[]) => void,
+  onParagraphEnd: (citations: Citation[]) => void,
+  onDone: () => void,
 ): Promise<void> {
   const response = await fetch(`${API_URL}/query/stream`, {
     method: 'POST',
@@ -58,7 +62,8 @@ export async function queryStreaming(
       if (!line.startsWith('data: ')) continue
       const event = JSON.parse(line.slice(6))
       if (event.type === 'token') onToken(event.text as string)
-      else if (event.type === 'citations') onDone(event.citations as string[])
+      else if (event.type === 'paragraph_end') onParagraphEnd(event.citations as Citation[])
     }
   }
+  onDone()
 }

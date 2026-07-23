@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { queryNonStreaming, queryStreaming } from './client'
 
 const MOCK_RESPONSE = {
-  paragraphs: [{ text: 'You need a 70% GPA.', citations: ['https://uwaterloo.ca/gpa'] }],
+  paragraphs: [{ text: 'You need a 70% GPA.', citations: [{ id: 'chunk-1', title: 'GPA Requirements', url: 'https://uwaterloo.ca/gpa' }] }],
   insufficient_context: false,
 }
 
@@ -10,7 +10,7 @@ const SSE_EVENTS = [
   'data: {"type":"token","text":"You "}\n\n',
   'data: {"type":"token","text":"need "}\n\n',
   'data: {"type":"token","text":"70%"}\n\n',
-  'data: {"type":"citations","citations":["https://uwaterloo.ca/gpa"]}\n\n',
+  'data: {"type":"paragraph_end","citations":[{"id":"chunk-1","title":"GPA Requirements","url":"https://uwaterloo.ca/gpa"}]}\n\n',
 ].join('')
 
 function makeStreamResponse(sseData: string): Response {
@@ -54,9 +54,10 @@ describe('queryStreaming', () => {
   it('calls onToken for each token event', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(makeStreamResponse(SSE_EVENTS)))
     const onToken = vi.fn()
+    const onParagraphEnd = vi.fn()
     const onDone = vi.fn()
 
-    await queryStreaming('What GPA?', onToken, onDone)
+    await queryStreaming('What GPA?', onToken, onParagraphEnd, onDone)
 
     expect(onToken).toHaveBeenCalledTimes(3)
     expect(onToken).toHaveBeenNthCalledWith(1, 'You ')
@@ -64,24 +65,38 @@ describe('queryStreaming', () => {
     expect(onToken).toHaveBeenNthCalledWith(3, '70%')
   })
 
-  it('calls onDone with citations as the final event', async () => {
+  it('calls onParagraphEnd with that paragraph\'s citations', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(makeStreamResponse(SSE_EVENTS)))
     const onToken = vi.fn()
+    const onParagraphEnd = vi.fn()
     const onDone = vi.fn()
 
-    await queryStreaming('What GPA?', onToken, onDone)
+    await queryStreaming('What GPA?', onToken, onParagraphEnd, onDone)
 
-    expect(onDone).toHaveBeenCalledTimes(1)
-    expect(onDone).toHaveBeenCalledWith(['https://uwaterloo.ca/gpa'])
+    expect(onParagraphEnd).toHaveBeenCalledTimes(1)
+    expect(onParagraphEnd).toHaveBeenCalledWith([{ id: 'chunk-1', title: 'GPA Requirements', url: 'https://uwaterloo.ca/gpa' }])
   })
 
-  it('calls onDone after all onToken calls', async () => {
+  it('calls onDone with no arguments once the stream closes', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(makeStreamResponse(SSE_EVENTS)))
+    const onToken = vi.fn()
+    const onParagraphEnd = vi.fn()
+    const onDone = vi.fn()
+
+    await queryStreaming('What GPA?', onToken, onParagraphEnd, onDone)
+
+    expect(onDone).toHaveBeenCalledTimes(1)
+    expect(onDone).toHaveBeenCalledWith()
+  })
+
+  it('calls onDone after all onToken and onParagraphEnd calls', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(makeStreamResponse(SSE_EVENTS)))
     const order: string[] = []
     const onToken = vi.fn(() => order.push('token'))
+    const onParagraphEnd = vi.fn(() => order.push('paragraph_end'))
     const onDone = vi.fn(() => order.push('done'))
 
-    await queryStreaming('What GPA?', onToken, onDone)
+    await queryStreaming('What GPA?', onToken, onParagraphEnd, onDone)
 
     expect(order.at(-1)).toBe('done')
     expect(order.filter(e => e === 'token').length).toBe(3)
@@ -89,6 +104,6 @@ describe('queryStreaming', () => {
 
   it('throws on non-ok response', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 503 }))
-    await expect(queryStreaming('test', vi.fn(), vi.fn())).rejects.toThrow('HTTP 503')
+    await expect(queryStreaming('test', vi.fn(), vi.fn(), vi.fn())).rejects.toThrow('HTTP 503')
   })
 })
