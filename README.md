@@ -69,8 +69,8 @@ MONGODB_DB_NAME=                      # database name
 MONGODB_COLLECTION_CHUNKS=            # collection that stores document chunks
 OPENAI_API_KEY=                       # used for embeddings
 OPENROUTER_API_KEY=                   # used for LLM calls
-OPENROUTER_GENERATION_MODEL=          # e.g. anthropic/claude-sonnet-4-6
-OPENROUTER_REWRITER_MODEL=            # e.g. anthropic/claude-haiku-4-5
+OPENROUTER_GENERATION_MODEL=          # e.g. openai/gpt-4.1-nano
+OPENROUTER_REWRITER_MODEL=            # e.g. google/gemini-2.5-flash-lite
 FRONTEND_ORIGIN=http://localhost:5174
 VITE_API_URL=http://localhost:8000
 ```

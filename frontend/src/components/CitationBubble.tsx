@@ -46,7 +46,7 @@ export function CitationBubble({ citations }: CitationBubbleProps) {
 
   return (
     <span
-      className="citation-bubble"
+      className={`citation-bubble citation-bubble--${placement}`}
       onMouseEnter={show}
       onMouseLeave={hide}
       onFocus={show}
@@ -62,6 +62,7 @@ export function CitationBubble({ citations }: CitationBubbleProps) {
         <DocumentIcon />
         {first.title} +{rest.length}
       </button>
+      {isOpen && <span className="citation-bubble__hover-bridge" aria-hidden="true" />}
       {isOpen && <CitationPopover citations={citations} placement={placement} />}
     </span>
   )
