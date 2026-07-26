@@ -22,7 +22,7 @@ async def _embed(text: str, client: AsyncOpenAI) -> list[float]:
 
 def _print_response(response) -> None:
     if response.insufficient_context:
-        print("  ⚠  Insufficient context — the system could not answer from retrieved documents.\n")
+        print("Insufficient context — the system could not answer from retrieved documents.\n")
 
     for i, paragraph in enumerate(response.paragraphs, 1):
         print(f"  {paragraph.text}")

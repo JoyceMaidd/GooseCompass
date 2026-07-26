@@ -11,6 +11,7 @@ from backend.db import connect, disconnect, get_database
 from backend.ingestion.pipeline import ingest_source
 
 _TEST_COLLECTION = "test_chunks_pipeline"
+_HTML_SOURCE = {"type": "html", "path": "backend/tests/fixtures/test.html"}
 
 
 @pytest.fixture(autouse=True)
@@ -69,3 +70,17 @@ class TestIngestSource:
     async def test_unknown_type_raises(self, clean_collection):
         with pytest.raises(ValueError, match="Unknown source type"):
             await ingest_source({"type": "ftp", "url": "ftp://example.com"}, clean_collection)
+
+    async def test_html_source_returns_positive_count(self, clean_collection, monkeypatch):
+        monkeypatch.setattr(settings, "mongodb_collection_chunks", _TEST_COLLECTION)
+        db = clean_collection
+        count = await ingest_source(_HTML_SOURCE, db)
+        assert count > 0
+
+    async def test_html_chunk_has_html_document_type(self, clean_collection, monkeypatch):
+        monkeypatch.setattr(settings, "mongodb_collection_chunks", _TEST_COLLECTION)
+        db = clean_collection
+        await ingest_source(_HTML_SOURCE, db)
+        doc = await db[_TEST_COLLECTION].find_one({})
+        assert doc is not None
+        assert doc["document_type"] == "html"

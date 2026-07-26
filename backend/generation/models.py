@@ -44,9 +44,12 @@ class Citation(BaseModel):
             itself for passthrough citations with no matching chunk.
         title: Document/source title. Falls back to the raw citation string
             for passthrough citations.
-        url: Original source URL, if known.
+        url: Original source URL. Only populated for "web" sources;
+            "pdf"/"html" sources carry a local file path here instead of a
+            browsable URL, so it is left None for those.
         snippet: Short preview of the supporting chunk text.
-        source_type: The chunk's document type ("web" or "pdf"), if known.
+        source_type: The chunk's document type ("web", "pdf", or "html"),
+            if known.
     """
 
     id: str

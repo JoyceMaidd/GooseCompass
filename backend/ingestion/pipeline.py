@@ -5,7 +5,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from backend.config import settings
 from backend.ingestion.chunker import chunk_document
 from backend.ingestion.embedder import embed_chunks
-from backend.ingestion.loader import load_pdf, load_url
+from backend.ingestion.loader import load_html, load_pdf, load_url
 from backend.ingestion.store import upsert_chunks
 
 
@@ -16,8 +16,8 @@ async def ingest_source(source: dict, db: AsyncIOMotorDatabase) -> int:
     then upserts into MongoDB.
 
     Args:
-        source: Dict with ``type`` ("web"/"pdf") and either ``url`` (web)
-            or ``path`` (pdf).
+        source: Dict with ``type`` ("web"/"pdf"/"html") and either ``url``
+            (web) or ``path`` (pdf/html).
         db: Motor database handle; chunks are written to the configured
             collection.
 
@@ -34,6 +34,8 @@ async def ingest_source(source: dict, db: AsyncIOMotorDatabase) -> int:
         doc = await load_url(source["url"])
     elif source_type == "pdf":
         doc = await load_pdf(source["path"])
+    elif source_type == "html":
+        doc = await load_html(source["path"])
     else:
         raise ValueError(f"Unknown source type: {source_type!r}")
 
