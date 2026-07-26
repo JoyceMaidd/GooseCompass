@@ -9,7 +9,7 @@ from openai import AsyncOpenAI
 from backend.config import settings
 from backend.db import connect, disconnect, get_database
 from backend.generation.models import Citation, RawCitedParagraph, RawGeneratedResponse
-from backend.generation.pipeline import _resolve_citations, answer
+from backend.generation.pipeline import _citation_from_chunk, _resolve_citations, answer
 from backend.retrieval.models import SearchResult
 from backend.retrieval.pipeline import retrieve
 
@@ -100,6 +100,25 @@ def test_resolve_citations_chunk_metadata_populates_citation():
     assert citation.title == "Doc 1"
     assert citation.source_type == "pdf"
     assert citation.snippet == "Short content."
+    assert citation.url is None  # pdf sources shouldn't get a browsable citation url
+
+
+def test_citation_from_chunk_web_keeps_url():
+    chunk = _make_chunk(1, "https://example.com/page", document_type="web")
+    citation = _citation_from_chunk(chunk)
+    assert citation.url == "https://example.com/page"
+
+
+def test_citation_from_chunk_pdf_suppresses_url():
+    chunk = _make_chunk(1, "documents/public/exchange_guide.pdf", document_type="pdf")
+    citation = _citation_from_chunk(chunk)
+    assert citation.url is None
+
+
+def test_citation_from_chunk_html_suppresses_url():
+    chunk = _make_chunk(1, "documents/private/country_guides/Sweden.html", document_type="html")
+    citation = _citation_from_chunk(chunk)
+    assert citation.url is None
 
 
 def test_resolve_citations_snippet_truncated():

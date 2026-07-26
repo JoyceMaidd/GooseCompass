@@ -13,7 +13,7 @@ class ChunkData(BaseModel):
         source_url: URL or file path of the originating document.
         document_title: Title of the source document.
         section_title: Title of the section containing this chunk.
-        document_type: Either "web" or "pdf".
+        document_type: One of "web", "pdf", or "html".
         chunk_index: Zero-based position of this chunk within the document.
     """
 
@@ -35,7 +35,7 @@ class Chunk(BaseModel):
         source_url: URL or file path of the originating document.
         document_title: Title of the source document.
         section_title: Title of the section containing this chunk.
-        document_type: Either "web" or "pdf".
+        document_type: One of "web", "pdf", or "html".
         chunk_index: Zero-based position of this chunk within the document.
     """
 

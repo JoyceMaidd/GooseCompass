@@ -38,7 +38,10 @@ def _citation_from_chunk(chunk: SearchResult) -> Citation:
 
     The citation id is the chunk's source_url rather than its chunk_id, so
     multiple chunks retrieved from the same document resolve to the same
-    citation identity and collapse into one entry during dedup.
+    citation identity and collapse into one entry during dedup. The citation
+    url is only populated for "web" sources — "pdf"/"html" sources carry a
+    local filesystem path in source_url, which isn't a meaningful clickable
+    link, so it's suppressed (left None) for those.
 
     Args:
         chunk: The context chunk this citation refers to.
@@ -46,10 +49,11 @@ def _citation_from_chunk(chunk: SearchResult) -> Citation:
     Returns:
         A Citation populated from the chunk's metadata.
     """
+    url = chunk.source_url if chunk.document_type == "web" else None
     return Citation(
         id=chunk.source_url,
         title=chunk.document_title,
-        url=chunk.source_url,
+        url=url,
         snippet=_snippet(chunk.content),
         source_type=chunk.document_type,
     )

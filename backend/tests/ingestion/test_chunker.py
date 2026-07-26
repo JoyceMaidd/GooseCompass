@@ -12,6 +12,7 @@ from backend.ingestion.models import ChunkData
 TEST_URL = "https://uwaterloo.ca/international-experience/exchange-and-study-abroad/go-abroad/getting-started"
 WEB_META = {"type": "web", "url": TEST_URL}
 PDF_META = {"type": "pdf", "path": "documents/public/exchange_guide.pdf"}
+HTML_META = {"type": "html", "path": "documents/private/country_guides/China (PRC).html"}
 
 
 def _make_test_doc() -> DoclingDocument:
@@ -31,6 +32,17 @@ def _make_test_doc() -> DoclingDocument:
     doc.add_text(label=DocItemLabel.PARAGRAPH, text=(
         "Submit the online application form at least six months before your "
         "intended departure. Attach all required documents including transcripts."
+    ))
+    return doc
+
+
+def _make_single_heading_doc(name: str) -> DoclingDocument:
+    """Build a DoclingDocument with one generic heading, like the real country guides."""
+    doc = DoclingDocument(name=name)
+    doc.add_heading(text="Tips", level=1)
+    doc.add_text(label=DocItemLabel.PARAGRAPH, text=(
+        "Public transit passes are affordable and widely used by exchange "
+        "students living off campus during their term abroad."
     ))
     return doc
 
@@ -87,3 +99,30 @@ class TestChunkDocumentPdf:
             assert chunk.document_type == "pdf"
             assert chunk.document_title != ""
             assert chunk.section_title != ""
+
+
+class TestChunkDocumentHtml:
+    async def test_returns_nonempty_list(self):
+        doc = _make_single_heading_doc("China (PRC)")
+        chunks = await chunk_document(doc, HTML_META)
+        assert len(chunks) > 0
+
+    async def test_document_title_uses_filename_not_heading(self):
+        doc = _make_single_heading_doc("China (PRC)")
+        chunks = await chunk_document(doc, HTML_META)
+        for chunk in chunks:
+            assert chunk.document_title == "China (PRC)"
+            assert chunk.document_title != "Tips"
+
+    async def test_section_title_still_uses_heading(self):
+        doc = _make_single_heading_doc("China (PRC)")
+        chunks = await chunk_document(doc, HTML_META)
+        for chunk in chunks:
+            assert chunk.section_title == "Tips"
+
+    async def test_html_metadata_populated(self):
+        doc = _make_single_heading_doc("Sweden")
+        chunks = await chunk_document(doc, HTML_META)
+        for chunk in chunks:
+            assert chunk.source_url == HTML_META["path"]
+            assert chunk.document_type == "html"

@@ -8,6 +8,13 @@ from docling.datamodel.pipeline_options import AcceleratorDevice, AcceleratorOpt
 from docling.document_converter import DocumentConverter, PdfFormatOption
 from docling_core.types.doc import DoclingDocument
 
+_BROWSER_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+    )
+}
+
 
 def _make_pdf_converter() -> DocumentConverter:
     """Build a DocumentConverter configured to use CPU for PDF layout inference.
@@ -28,7 +35,7 @@ def _make_pdf_converter() -> DocumentConverter:
 
 def _convert_url(url: str) -> DoclingDocument:
     conv = DocumentConverter()
-    result = conv.convert(url)
+    result = conv.convert(url, headers=_BROWSER_HEADERS)
     if result.status != ConversionStatus.SUCCESS:
         raise RuntimeError(f"Docling failed to convert URL '{url}': {result.errors}")
     return result.document
@@ -39,6 +46,14 @@ def _convert_pdf(path: str) -> DoclingDocument:
     result = conv.convert(Path(path))
     if result.status != ConversionStatus.SUCCESS:
         raise RuntimeError(f"Docling failed to convert PDF '{path}': {result.errors}")
+    return result.document
+
+
+def _convert_html(path: str) -> DoclingDocument:
+    conv = DocumentConverter()
+    result = conv.convert(Path(path))
+    if result.status != ConversionStatus.SUCCESS:
+        raise RuntimeError(f"Docling failed to convert HTML '{path}': {result.errors}")
     return result.document
 
 
@@ -70,3 +85,18 @@ async def load_pdf(path: str) -> DoclingDocument:
         RuntimeError: If Docling reports a conversion failure.
     """
     return await asyncio.to_thread(_convert_pdf, path)
+
+
+async def load_html(path: str) -> DoclingDocument:
+    """Load and parse a local HTML file via Docling.
+
+    Args:
+        path: Filesystem path to the HTML file.
+
+    Returns:
+        Parsed DoclingDocument with text and structure extracted.
+
+    Raises:
+        RuntimeError: If Docling reports a conversion failure.
+    """
+    return await asyncio.to_thread(_convert_html, path)
