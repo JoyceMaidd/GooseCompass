@@ -1,0 +1,80 @@
+[
+  {
+    "id": "eligibility-gpa-general",
+    "category": "eligibility",
+    "query": "What GPA do I need to be eligible to go on an exchange?",
+    "expected_output": "There isn't one single university-wide minimum GPA. You should pay close attention to the minimum overall average and language requirements listed for each host school on Waterloo Passport, since these vary by school. Your own faculty also sets its own eligibility requirements, so check your faculty's exchange page as well."
+  },
+  {
+    "id": "eligibility-engineering",
+    "category": "eligibility",
+    "query": "What are the eligibility requirements for an Engineering student to go on exchange?",
+    "expected_output": "Engineering students need a cumulative average of 80.0, or a term average of 80.0 in each of the two most recently completed academic terms (Chemical, Civil, Architectural, Environmental, and Geological Engineering will consider students with a cumulative average of 75.0). Students must have successfully completed at least 2B term before departure, must have passed all previously failed or dropped courses, need an approved plan to satisfy co-op requirements before 4B term, must maintain a good record for conduct and academic integrity, and need language proficiency if the host institution's primary language of instruction isn't English."
+  },
+  {
+    "id": "application-timeline",
+    "category": "application",
+    "query": "When should I apply for an exchange, and when would I go abroad?",
+    "expected_output": "Undergraduate students should aim to apply during their second year, for departure in their 3A or 3B term. You should also consider your timeline carefully -- for example, going abroad in your final winter term won't allow time for spring (June) convocation."
+  },
+  {
+    "id": "match-guarantee",
+    "category": "application",
+    "query": "If I'm matched with a host school, is that a guarantee I'll be accepted?",
+    "expected_output": "No -- being matched means the university has held a spot for you at that school, but it doesn't guarantee acceptance to the host school. Matches are released in a single round, and while the university does its best to accommodate as many student preferences as possible, it cannot guarantee students receive their first-choice placement."
+  },
+  {
+    "id": "after-match-steps",
+    "category": "application",
+    "query": "What do I need to do after I've been matched with a host school?",
+    "expected_output": "After being matched, you need to carefully read your offer of admission and complete whatever tasks the host school requires. You should book your flight only after receiving acceptance from the host school, and apply for your study permit or visa if required at that point. You're also required to register your exchange travel and complete the Pre-Departure Safety Training course in LEARN before departing, and to register for the IC4E (Intercultural Competence for Exchange) training as a final requirement."
+  },
+  {
+    "id": "course-flexibility",
+    "category": "application",
+    "query": "Can I be sure the courses I want to take abroad will be available?",
+    "expected_output": "No -- the university cannot guarantee course availability at the host institution, so it's important to be flexible when selecting courses for any exchange program."
+  },
+  {
+    "id": "tuition-during-exchange",
+    "category": "finance",
+    "query": "How does tuition work while I'm on exchange?",
+    "expected_output": "On an exchange program, you remain enrolled at Waterloo and continue paying tuition to Waterloo rather than the host school. You'll be charged for 2.5 units whether you take three, four, or five courses abroad, and tuition must be paid by the standard term deadline to avoid late fees. This differs from Study Abroad programs, where tuition is assessed directly by the host institution."
+  },
+  {
+    "id": "financial-aid-osap",
+    "category": "finance",
+    "query": "Can I still receive OSAP while on exchange?",
+    "expected_output": "Yes -- exchange participants who remain registered as full-time Waterloo students are still eligible for OSAP. Questions should be directed to the Student Awards & Financial Aid Office."
+  },
+  {
+    "id": "exchange-scholarships",
+    "category": "finance",
+    "query": "Are there scholarships available specifically for exchange students?",
+    "expected_output": "Yes -- undergraduates can apply for International Experience Awards, and graduate students can apply for David Johnston International Experience Awards. Faculty-specific scholarships may also be available; students should inquire with their Faculty Exchange Representative."
+  },
+  {
+    "id": "safety-registration-requirement",
+    "category": "safety",
+    "query": "Do I need to register my travel before going on exchange?",
+    "expected_output": "Yes, this is mandatory. You must complete the international travel registration form before departing, registering only the dates and locations of your exchange program (not personal travel). Failing to register means your travel will not be endorsed by the University of Waterloo, and the university will not be responsible for your duty of care during your exchange semester."
+  },
+  {
+    "id": "ic4e-what-is-it",
+    "category": "training",
+    "query": "What is the IC4E training and do I have to complete it?",
+    "expected_output": "IC4E (Intercultural Competence for Exchange) is a three-part training program designed to help you navigate intercultural challenges you may face during your exchange, and all students going on exchange are expected to complete it. It takes about seven hours spread across a six-month period."
+  },
+  {
+    "id": "wellness-accommodations",
+    "category": "wellness",
+    "query": "If I have an accommodation through AccessAbility Services, can I get that support while on exchange?",
+    "expected_output": "Students registered with AccessAbility Services can request a Verification of Academic Accommodations Letter to send to their host institution, though accommodations cannot be guaranteed abroad."
+  },
+  {
+    "id": "emergency-contacts",
+    "category": "safety",
+    "query": "What should I do to prepare for emergencies while abroad?",
+    "expected_output": "You should review Waterloo International's 'who to contact in an emergency' webpage ahead of time to get a complete list of emergency contacts, and create your own list including host school supports, local emergency numbers, campus resources at Waterloo, and local embassy information. You can also connect with a Global Learning Coordinator for guidance, including while abroad regarding safety concerns, cross-cultural conflicts, program issues, or the need for an early return."
+  }
+]
