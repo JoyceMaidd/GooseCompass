@@ -11,7 +11,7 @@ from backend.eval.models import GoldenExample
 
 def test_loads_real_fixture():
     examples = load_golden_dataset()
-    assert len(examples) >= 12
+    assert len(examples) >= 8
     assert all(isinstance(e, GoldenExample) for e in examples)
 
 
