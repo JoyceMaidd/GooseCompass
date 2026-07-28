@@ -1,5 +1,12 @@
 """Eval CLI — runs the golden dataset through the pipeline and scores it with DeepEval.
 
+Examples run concurrently (bounded by --concurrency), and within each
+example all metrics also run concurrently -- see backend/eval/scoring.py,
+which disables DeepEval's own progress indicator so concurrent runs can't
+corrupt each other's terminal output. Each example's report is built as one
+string and printed only once it's complete, so concurrent examples can't
+interleave output mid-line either.
+
 Answer Relevancy and Faithfulness are hard-gated (non-zero exit on a
 threshold miss). Contextual Precision/Recall/Relevancy are reported as
 warnings only and never affect the exit code -- see backend/eval/metrics.py.
@@ -33,8 +40,9 @@ async def _run_example(example, collection, embed_client, judge) -> tuple[bool, 
 
     Returns:
         A tuple of (passed, report) where passed is True if the example
-        cleared the hard metric gate, and report is the printable summary
-        for this example.
+        cleared the hard metric gate, and report is the full printable
+        summary for this example, built as one string so it can't be
+        interleaved with another example's output.
     """
     test_case = await run_pipeline_for_example(example, collection, embed_client)
     try:
@@ -73,7 +81,7 @@ async def _run_example_bounded(semaphore, example, collection, embed_client, jud
 
 
 async def run(concurrency: int = _DEFAULT_CONCURRENCY) -> bool:
-    """Run every golden example through the pipeline in parallel and print a metric report.
+    """Run every golden example through the pipeline and print a metric report.
 
     Args:
         concurrency: Maximum number of examples scored concurrently.
