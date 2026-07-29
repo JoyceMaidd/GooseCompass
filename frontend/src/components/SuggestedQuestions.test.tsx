@@ -7,8 +7,8 @@ describe('SuggestedQuestions', () => {
   it('renders each question exactly once in the accessible tree', () => {
     render(<SuggestedQuestions onSelect={vi.fn()} />)
 
-    expect(screen.getAllByRole('button', { name: 'How do I apply for an exchange program?' })).toHaveLength(1)
-    expect(screen.getAllByRole('button', { name: "What's the application deadline?" })).toHaveLength(1)
+    expect(screen.getAllByRole('button', { name: 'I want to study abroad, what should I do?' })).toHaveLength(1)
+    expect(screen.getAllByRole('button', { name: "When is the application deadline?" })).toHaveLength(1)
   })
 
   it('calls onSelect with the exact question text when a pill is clicked', async () => {
@@ -23,7 +23,7 @@ describe('SuggestedQuestions', () => {
   it('hides duplicate marquee pills from assistive tech', () => {
     render(<SuggestedQuestions onSelect={vi.fn()} />)
 
-    const allPills = screen.getAllByText('Do I need a visa for my exchange?')
+    const allPills = screen.getAllByText('What is Waterloo Passport?')
     expect(allPills).toHaveLength(2)
     expect(allPills.some(el => el.getAttribute('aria-hidden') === 'true')).toBe(true)
   })
