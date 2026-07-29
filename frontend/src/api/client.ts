@@ -1,6 +1,12 @@
+import { getToken } from '../lib/authStorage'
 import type { Citation, GeneratedResponse } from '../types'
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
+
+function authHeaders(): Record<string, string> {
+  const token = getToken()
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
 
 /**
  * Send a query and receive the full structured response in one shot.
@@ -11,7 +17,7 @@ const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 export async function queryNonStreaming(query: string): Promise<GeneratedResponse> {
   const response = await fetch(`${API_URL}/query`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
     body: JSON.stringify({ query }),
   })
   if (!response.ok) throw new Error(`HTTP ${response.status}`)
@@ -39,7 +45,7 @@ export async function queryStreaming(
 ): Promise<void> {
   const response = await fetch(`${API_URL}/query/stream`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
     body: JSON.stringify({ query }),
   })
   if (!response.ok) throw new Error(`HTTP ${response.status}`)

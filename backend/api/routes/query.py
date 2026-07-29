@@ -4,11 +4,12 @@ import asyncio
 import json
 from collections.abc import AsyncIterator
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 from openai import AsyncOpenAI
 from pydantic import BaseModel
 
+from backend.auth.dependency import require_auth
 from backend.config import settings
 from backend.db import get_database
 from backend.generation.models import Citation, CitedParagraph, GeneratedResponse
@@ -51,13 +52,15 @@ async def _embed(text: str) -> list[float]:
 
 
 @router.post("/query", response_model=GeneratedResponse, response_model_exclude_none=True)
-async def query(request: QueryRequest) -> GeneratedResponse:
+async def query(request: QueryRequest, _email: str = Depends(require_auth)) -> GeneratedResponse:
     """Run the full RAG pipeline for a user query.
 
     Pipeline: rewrite → embed → retrieve → generate.
 
     Args:
         request: The query payload.
+        _email: The verified email of the caller (unused this step; the
+            dependency's role here is purely to gate access).
 
     Returns:
         A structured GeneratedResponse with paragraph-level citations.
@@ -144,7 +147,7 @@ async def _stream_response(response: GeneratedResponse) -> AsyncIterator[str]:
 
 
 @router.post("/query/stream")
-async def query_stream(request: QueryRequest) -> StreamingResponse:
+async def query_stream(request: QueryRequest, _email: str = Depends(require_auth)) -> StreamingResponse:
     """Run the full RAG pipeline and stream the response as SSE.
 
     Token events arrive word-by-word within each paragraph; a paragraph_end
@@ -153,6 +156,8 @@ async def query_stream(request: QueryRequest) -> StreamingResponse:
 
     Args:
         request: The query payload.
+        _email: The verified email of the caller (unused this step; the
+            dependency's role here is purely to gate access).
 
     Returns:
         A text/event-stream StreamingResponse.

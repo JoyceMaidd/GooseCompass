@@ -5,14 +5,15 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from backend.api.routes.auth import router as auth_router
 from backend.api.routes.query import router as query_router
 from backend.config import settings
-from backend.db import connect, disconnect
+from backend.db import connect, connect_postgres, disconnect, disconnect_postgres
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Open the MongoDB connection on startup and close it on shutdown.
+    """Open the MongoDB and Postgres connections on startup, close on shutdown.
 
     Args:
         app: The FastAPI application instance.
@@ -21,8 +22,10 @@ async def lifespan(app: FastAPI):
         None
     """
     await connect()
+    await connect_postgres()
     yield
     await disconnect()
+    await disconnect_postgres()
 
 
 app = FastAPI(title="GooseCompass", lifespan=lifespan)
@@ -36,6 +39,7 @@ app.add_middleware(
 )
 
 app.include_router(query_router)
+app.include_router(auth_router)
 
 
 @app.get("/health")

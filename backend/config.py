@@ -18,6 +18,16 @@ class Settings(BaseSettings):
     openrouter_rewriter_model: str
     openrouter_eval_judge_model: str
     frontend_origin: str
+    postgres_uri: str
+    jwt_secret: str
+    jwt_expiry_minutes: int
+    email_provider: str
+    email_api_key: str
+    email_from: str
+    otp_ttl_minutes: int
+    otp_max_attempts: int
+    otp_resend_cooldown_seconds: int
+    otp_code_length: int
 
 
 settings = Settings()

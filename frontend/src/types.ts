@@ -24,3 +24,12 @@ export interface Message {
   role: 'user' | 'assistant'
   paragraphs: CitedParagraph[]
 }
+
+/** Steps in the sign-in flow. */
+export type AuthStep = 'email' | 'otp'
+
+/** Response shape from POST /auth/verify-code. */
+export interface VerifyCodeResponse {
+  access_token: string
+  token_type: string
+}
