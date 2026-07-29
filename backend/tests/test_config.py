@@ -13,6 +13,8 @@ def test_settings_loaded():
     assert settings.openrouter_api_key
     assert settings.openrouter_generation_model
     assert settings.openrouter_rewriter_model
+    assert settings.postgres_uri
+    assert settings.jwt_secret
 
 
 def test_validation_error_on_missing_field(monkeypatch, tmp_path):
@@ -28,6 +30,16 @@ def test_validation_error_on_missing_field(monkeypatch, tmp_path):
         "OPENROUTER_API_KEY",
         "OPENROUTER_GENERATION_MODEL",
         "OPENROUTER_REWRITER_MODEL",
+        "POSTGRES_URI",
+        "JWT_SECRET",
+        "JWT_EXPIRY_MINUTES",
+        "EMAIL_PROVIDER",
+        "EMAIL_API_KEY",
+        "EMAIL_FROM",
+        "OTP_TTL_MINUTES",
+        "OTP_MAX_ATTEMPTS",
+        "OTP_RESEND_COOLDOWN_SECONDS",
+        "OTP_CODE_LENGTH",
     ]
     for key in required_keys:
         monkeypatch.delenv(key, raising=False)

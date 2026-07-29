@@ -1,0 +1,50 @@
+[
+  {
+    "id": "matching-process",
+    "category": "matching",
+    "query": "How does the study abroad team determine who gets matched with a partner school?",
+    "expected_output": "We allocate exchange spots at each school to students in Waterloo's six faculties based on: Number of applications that are received from each faculty, your GPA and program type, and your faculty endorsement. Students who apply only to ultra competitive (red schools) or very competitive (yellow schools) risk not getting matched, even with a high GPA."
+  },
+  {
+    "id": "eligibility-gpa-general",
+    "category": "eligibility",
+    "query": "What GPA do I need to be eligible to go on an exchange?",
+    "expected_output": "There isn't one single university-wide minimum GPA. You should pay close attention to the minimum overall average and language requirements listed for each host school on Waterloo Passport, since these vary by school. Your own faculty also sets its own eligibility requirements, so check your faculty's exchange page as well."
+  },
+  {
+    "id": "match-guarantee",
+    "category": "application",
+    "query": "If I'm matched with a host school, is that a guarantee I'll be accepted?",
+    "expected_output": "No -- being matched means the university has held a spot for you at that school, but it doesn't guarantee acceptance to the host school. Matches are released in a single round, and while the university does its best to accommodate as many student preferences as possible, it cannot guarantee students receive their first-choice placement."
+  },
+  {
+    "id": "after-match-steps",
+    "category": "application",
+    "query": "What do I need to do after I've been matched with a host school?",
+    "expected_output": "After being matched, you need to carefully read your offer of admission and complete whatever tasks the host school requires. You should book your flight only after receiving acceptance from the host school, and apply for your study permit or visa if required at that point. You're also required to register your exchange travel and complete the Pre-Departure Safety Training course in LEARN before departing, and to register for the IC4E (Intercultural Competence for Exchange) training as a final requirement."
+  },
+  {
+    "id": "course-flexibility",
+    "category": "application",
+    "query": "Can I be sure the courses I want to take abroad will be available?",
+    "expected_output": "No -- the university cannot guarantee course availability at the host institution, so it's important to be flexible when selecting courses for any exchange program."
+  },
+  {
+    "id": "tuition-during-exchange",
+    "category": "finance",
+    "query": "How does tuition work while I'm on exchange?",
+    "expected_output": "On an exchange program, you remain enrolled at Waterloo and continue paying tuition to Waterloo rather than the host school. You'll be charged for 2.5 units whether you take three, four, or five courses abroad, and tuition must be paid by the standard term deadline to avoid late fees. This differs from Study Abroad programs, where tuition is assessed directly by the host institution."
+  },
+  {
+    "id": "financial-aid-osap",
+    "category": "finance",
+    "query": "Can I still receive OSAP while on exchange?",
+    "expected_output": "Yes -- exchange participants who remain registered as full-time Waterloo students are still eligible for OSAP. Questions should be directed to the Student Awards & Financial Aid Office."
+  },
+  {
+    "id": "exchange-scholarships",
+    "category": "finance",
+    "query": "Are there scholarships available for exchange students?",
+    "expected_output": "Yes -- undergraduates can apply for International Experience Awards, and graduate students can apply for David Johnston International Experience Awards. Faculty-specific scholarships may also be available; students should inquire with their Faculty Exchange Representative."
+  }
+]

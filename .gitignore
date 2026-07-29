@@ -24,6 +24,13 @@ frontend/.vite/
 .idea/
 .vscode/
 
+# DeepEval telemetry cache
+.deepeval/
+
 # Source documents
 documents/
 sources.json
+
+# Claude
+.claude/tasks
+.claude/specs

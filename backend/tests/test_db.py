@@ -1,6 +1,14 @@
 import pytest
+from sqlalchemy import text
 
-from backend.db import connect, disconnect, get_database
+from backend.db import (
+    connect,
+    connect_postgres,
+    disconnect,
+    disconnect_postgres,
+    get_database,
+    get_session,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -24,3 +32,23 @@ async def test_get_database_raises_before_connect():
     await disconnect()
     with pytest.raises(RuntimeError):
         get_database()
+
+
+@pytest.mark.integration
+async def test_postgres_session_select_one():
+    """Connection succeeds and a real Postgres instance answers SELECT 1."""
+    await connect_postgres()
+    try:
+        async for session in get_session():
+            result = await session.execute(text("SELECT 1"))
+            assert result.scalar() == 1
+    finally:
+        await disconnect_postgres()
+
+
+async def test_get_session_raises_before_connect():
+    """get_session raises RuntimeError when called without a connection."""
+    await disconnect_postgres()
+    with pytest.raises(RuntimeError):
+        async for _ in get_session():
+            pass
