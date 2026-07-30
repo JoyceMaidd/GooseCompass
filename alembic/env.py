@@ -6,6 +6,7 @@ from sqlalchemy import pool
 from alembic import context
 
 import backend.auth.models  # noqa: F401 — registers auth tables on Base.metadata
+import backend.monitoring.models  # noqa: F401 — registers monitoring tables on Base.metadata
 from backend.config import settings
 from backend.db import Base
 

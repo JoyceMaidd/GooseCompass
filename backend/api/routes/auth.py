@@ -1,11 +1,12 @@
 """POST /auth/request-code and POST /auth/verify-code routes."""
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.auth import service
 from backend.db import get_session
+from backend.monitoring.rate_limit import limiter
 
 router = APIRouter(prefix="/auth")
 
@@ -45,12 +46,18 @@ class VerifyCodeResponse(BaseModel):
 
 
 @router.post("/request-code", status_code=204)
+@limiter.limit("5/60s")
 async def request_code_route(
-    payload: RequestCodeRequest, session: AsyncSession = Depends(get_session)
+    request: Request,
+    payload: RequestCodeRequest,
+    session: AsyncSession = Depends(get_session),
 ) -> None:
     """Request a one-time code be emailed to a @uwaterloo.ca address.
 
+    Rate-limited to 5 requests per 60 seconds per IP.
+
     Args:
+        request: FastAPI request (for rate limiting).
         payload: The request payload containing the target email.
         session: An open Postgres async session.
 
@@ -59,7 +66,8 @@ async def request_code_route(
 
     Raises:
         HTTPException: 400 if the email is not a @uwaterloo.ca address,
-            429 if requested again within the resend cooldown window.
+            429 if requested again within the resend cooldown window or
+            if rate limit is exceeded.
     """
     try:
         await service.request_code(session, payload.email)
