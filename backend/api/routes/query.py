@@ -2,19 +2,24 @@
 
 import asyncio
 import json
+import time
 from collections.abc import AsyncIterator
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends
 from fastapi.responses import StreamingResponse
 from openai import AsyncOpenAI
 from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.auth.dependency import require_auth
 from backend.config import settings
-from backend.db import get_database
+from backend.db import get_database, get_session
 from backend.generation.models import Citation, CitedParagraph, GeneratedResponse
-from backend.generation.pipeline import answer
+from backend.generation.pipeline import answer_with_usage
 from backend.generation.rewriter import rewrite_query
+from backend.monitoring.logging import log_usage_to_db
+from backend.monitoring.quota import check_user_quota
+from backend.monitoring.spend_cap import check_spend_cap
 from backend.retrieval.pipeline import retrieve
 
 router = APIRouter()
@@ -52,19 +57,29 @@ async def _embed(text: str) -> list[float]:
 
 
 @router.post("/query", response_model=GeneratedResponse, response_model_exclude_none=True)
-async def query(request: QueryRequest, _email: str = Depends(require_auth)) -> GeneratedResponse:
+async def query(
+    request: QueryRequest,
+    background_tasks: BackgroundTasks,
+    session: AsyncSession = Depends(get_session),
+    user_id: int = Depends(check_user_quota),
+    _: None = Depends(check_spend_cap),
+) -> GeneratedResponse:
     """Run the full RAG pipeline for a user query.
 
-    Pipeline: rewrite → embed → retrieve → generate.
+    Pipeline: rewrite → embed → retrieve → generate. Checks quota before
+    generation and spend-cap before LLM call. Logs usage asynchronously.
 
     Args:
         request: The query payload.
-        _email: The verified email of the caller (unused this step; the
-            dependency's role here is purely to gate access).
+        background_tasks: FastAPI background task runner.
+        session: Postgres async session (for quota/spend-cap/logging).
+        user_id: User ID (from quota check; returned if under limit).
+        _: Spend-cap check (raises if exceeded).
 
     Returns:
         A structured GeneratedResponse with paragraph-level citations.
     """
+    start_time = time.time()
     rewritten = await rewrite_query(request.query)
     embedding = await _embed(rewritten)
 
@@ -72,7 +87,20 @@ async def query(request: QueryRequest, _email: str = Depends(require_auth)) -> G
     collection = db[settings.mongodb_collection_chunks]
     chunks = await retrieve(rewritten, embedding, collection, top_k=_TOP_K)
 
-    return await answer(request.query, chunks)
+    response, input_tokens, output_tokens = await answer_with_usage(request.query, chunks)
+
+    latency_ms = int((time.time() - start_time) * 1000)
+    background_tasks.add_task(
+        log_usage_to_db,
+        session,
+        user_id,
+        input_tokens,
+        output_tokens,
+        200,
+        latency_ms,
+    )
+
+    return response
 
 
 async def _sse_event(payload: dict) -> str:
@@ -147,21 +175,32 @@ async def _stream_response(response: GeneratedResponse) -> AsyncIterator[str]:
 
 
 @router.post("/query/stream")
-async def query_stream(request: QueryRequest, _email: str = Depends(require_auth)) -> StreamingResponse:
+async def query_stream(
+    request: QueryRequest,
+    background_tasks: BackgroundTasks,
+    session: AsyncSession = Depends(get_session),
+    user_id: int = Depends(check_user_quota),
+    _: None = Depends(check_spend_cap),
+) -> StreamingResponse:
     """Run the full RAG pipeline and stream the response as SSE.
 
     Token events arrive word-by-word within each paragraph; a paragraph_end
     event follows each paragraph's tokens, carrying that paragraph's own
     citations. The stream closes once the last paragraph_end has been sent.
+    Checks quota before generation and spend-cap before LLM call. Logs usage
+    asynchronously after streaming completes.
 
     Args:
         request: The query payload.
-        _email: The verified email of the caller (unused this step; the
-            dependency's role here is purely to gate access).
+        background_tasks: FastAPI background task runner.
+        session: Postgres async session (for quota/spend-cap/logging).
+        user_id: User ID (from quota check; returned if under limit).
+        _: Spend-cap check (raises if exceeded).
 
     Returns:
         A text/event-stream StreamingResponse.
     """
+    start_time = time.time()
     rewritten = await rewrite_query(request.query)
     embedding = await _embed(rewritten)
 
@@ -169,9 +208,24 @@ async def query_stream(request: QueryRequest, _email: str = Depends(require_auth
     collection = db[settings.mongodb_collection_chunks]
     chunks = await retrieve(rewritten, embedding, collection, top_k=_TOP_K)
 
-    response = await answer(request.query, chunks)
+    response, input_tokens, output_tokens = await answer_with_usage(request.query, chunks)
+
+    async def _stream_with_logging() -> AsyncIterator[str]:
+        try:
+            async for event in _stream_response(response):
+                yield event
+        finally:
+            latency_ms = int((time.time() - start_time) * 1000)
+            await log_usage_to_db(
+                session,
+                user_id,
+                input_tokens,
+                output_tokens,
+                200,
+                latency_ms,
+            )
 
     return StreamingResponse(
-        _stream_response(response),
+        _stream_with_logging(),
         media_type="text/event-stream",
     )

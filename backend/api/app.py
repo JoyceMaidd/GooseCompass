@@ -9,6 +9,7 @@ from backend.api.routes.auth import router as auth_router
 from backend.api.routes.query import router as query_router
 from backend.config import settings
 from backend.db import connect, connect_postgres, disconnect, disconnect_postgres
+from backend.monitoring.rate_limit import limiter
 
 
 @asynccontextmanager
@@ -29,6 +30,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="GooseCompass", lifespan=lifespan)
+app.state.limiter = limiter
 
 app.add_middleware(
     CORSMiddleware,

@@ -38,26 +38,31 @@ def _mock_chunks() -> list[SearchResult]:
 
 
 @pytest.fixture(scope="module")
-async def response() -> RawGeneratedResponse:
+async def response() -> tuple[RawGeneratedResponse, int, int]:
     """Single API call shared across all assertions in this module."""
     prompt = build_prompt("What GPA do I need to go on exchange?", _mock_chunks())
     return await generate_response(prompt)
 
 
 @pytest.mark.asyncio
-async def test_generate_response_returns_generated_response(response: RawGeneratedResponse):
-    """generate_response must return a RawGeneratedResponse instance."""
-    assert isinstance(response, RawGeneratedResponse)
+async def test_generate_response_returns_generated_response(response: tuple[RawGeneratedResponse, int, int]):
+    """generate_response must return a RawGeneratedResponse and token counts."""
+    generated_response, input_tokens, output_tokens = response
+    assert isinstance(generated_response, RawGeneratedResponse)
+    assert isinstance(input_tokens, int) and input_tokens > 0
+    assert isinstance(output_tokens, int) and output_tokens > 0
 
 
 @pytest.mark.asyncio
-async def test_generate_response_has_paragraphs(response: RawGeneratedResponse):
+async def test_generate_response_has_paragraphs(response: tuple[RawGeneratedResponse, int, int]):
     """Response must contain at least one non-empty paragraph."""
-    assert len(response.paragraphs) >= 1
-    assert all(len(p.text.strip()) > 0 for p in response.paragraphs)
+    generated_response, _, _ = response
+    assert len(generated_response.paragraphs) >= 1
+    assert all(len(p.text.strip()) > 0 for p in generated_response.paragraphs)
 
 
 @pytest.mark.asyncio
-async def test_generate_response_not_insufficient(response: RawGeneratedResponse):
+async def test_generate_response_not_insufficient(response: tuple[RawGeneratedResponse, int, int]):
     """Response should not flag insufficient context when chunks are relevant."""
-    assert response.insufficient_context is False
+    generated_response, _, _ = response
+    assert generated_response.insufficient_context is False

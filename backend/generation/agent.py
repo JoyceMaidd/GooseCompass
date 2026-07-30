@@ -32,7 +32,7 @@ def _make_agent() -> Agent[None, RawGeneratedResponse]:
 _agent = _make_agent()
 
 
-async def generate_response(prompt: str) -> RawGeneratedResponse:
+async def generate_response(prompt: str) -> tuple[RawGeneratedResponse, int, int]:
     """Generate a structured, cited response for the given prompt.
 
     Runs the PydanticAI agent against OpenRouter and validates the output
@@ -45,7 +45,8 @@ async def generate_response(prompt: str) -> RawGeneratedResponse:
             system instruction, context chunks, and user query.
 
     Returns:
-        A RawGeneratedResponse with paragraph-level raw citation references.
+        A tuple of (RawGeneratedResponse with paragraph-level raw citation
+        references, input_tokens, output_tokens).
 
     Raises:
         Exception: Re-raises the last exception if all retries are exhausted.
@@ -54,7 +55,7 @@ async def generate_response(prompt: str) -> RawGeneratedResponse:
     for attempt in range(3):
         try:
             result = await _agent.run(prompt)
-            return result.output
+            return result.output, result.usage.input_tokens, result.usage.output_tokens
         except Exception as exc:
             last_exc = exc
             if attempt < 2:

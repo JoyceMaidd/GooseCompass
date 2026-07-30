@@ -25,6 +25,8 @@ dependencies = [
     "alembic>=1.13",
     "pyjwt>=2.9",
     "bcrypt>=4.2",
+    "slowapi>=0.1.9",
+    "redis>=5.0",
 ]
 
 [project.optional-dependencies]

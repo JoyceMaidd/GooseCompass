@@ -99,8 +99,10 @@ def _resolve_citations(
     return GeneratedResponse(paragraphs=resolved, insufficient_context=response.insufficient_context)
 
 
-async def answer(query: str, context_chunks: list[SearchResult]) -> GeneratedResponse:
-    """Generate a grounded, cited response for a query given retrieved context.
+async def answer_with_usage(
+    query: str, context_chunks: list[SearchResult]
+) -> tuple[GeneratedResponse, int, int]:
+    """Generate a grounded, cited response and return token usage.
 
     Assembles the prompt from the query and context chunks, then runs the
     PydanticAI agent to produce a structured response. Retrieval and query
@@ -111,9 +113,28 @@ async def answer(query: str, context_chunks: list[SearchResult]) -> GeneratedRes
         context_chunks: Top-k retrieved chunks from the retrieval pipeline.
 
     Returns:
+        A tuple of (GeneratedResponse with paragraph-level citations resolved to
+        structured Citation objects, input_tokens, output_tokens).
+    """
+    prompt = build_prompt(query, context_chunks)
+    response, input_tokens, output_tokens = await generate_response(prompt)
+    return _resolve_citations(response, context_chunks), input_tokens, output_tokens
+
+
+async def answer(query: str, context_chunks: list[SearchResult]) -> GeneratedResponse:
+    """Generate a grounded, cited response for a query given retrieved context.
+
+    Wrapper around answer_with_usage that discards token usage data. Use
+    answer_with_usage directly if token counts are needed (e.g., for cost
+    tracking in routes).
+
+    Args:
+        query: The (rewritten) user question.
+        context_chunks: Top-k retrieved chunks from the retrieval pipeline.
+
+    Returns:
         A GeneratedResponse with paragraph-level citations resolved to
         structured Citation objects.
     """
-    prompt = build_prompt(query, context_chunks)
-    response = await generate_response(prompt)
-    return _resolve_citations(response, context_chunks)
+    response, _, _ = await answer_with_usage(query, context_chunks)
+    return response
