@@ -33,6 +33,13 @@ describe('useAuth', () => {
     expect(result.current.isAuthenticated).toBe(true)
   })
 
+  it('decodes and initializes email from a stored JWT on mount', () => {
+    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJqb2huQHV3YXRlcmxvby5jYSIsImlhdCI6MTcyNjA3ODAwMCwiZXhwIjoxNzI2MDgxNjAwfQ.fakesignature'
+    localStorage.setItem('goosecompass_token', token)
+    const { result } = renderHook(() => useAuth())
+    expect(result.current.email).toBe('john@uwaterloo.ca')
+  })
+
   it('submitEmail success advances to the otp step', async () => {
     mockRequestCode.mockResolvedValue(undefined)
     const { result } = renderHook(() => useAuth())
