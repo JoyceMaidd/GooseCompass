@@ -5,9 +5,7 @@ from pathlib import Path
 
 from backend.eval.models import GoldenExample
 
-DEFAULT_FIXTURE_PATH = (
-    Path(__file__).parent.parent / "tests" / "fixtures" / "golden_dataset.json"
-)
+DEFAULT_FIXTURE_PATH = Path(__file__).parent.parent / "tests" / "fixtures" / "golden_dataset.json"
 
 
 def load_golden_dataset(path: Path = DEFAULT_FIXTURE_PATH) -> list[GoldenExample]:

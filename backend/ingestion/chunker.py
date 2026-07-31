@@ -73,9 +73,7 @@ def _extract_chunks(doc: DoclingDocument, source_meta: dict[str, Any]) -> list[C
     return result
 
 
-async def chunk_document(
-    doc: DoclingDocument, source_meta: dict[str, Any]
-) -> list[ChunkData]:
+async def chunk_document(doc: DoclingDocument, source_meta: dict[str, Any]) -> list[ChunkData]:
     """Chunk a parsed document into embeddable pieces.
 
     Args:

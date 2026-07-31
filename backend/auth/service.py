@@ -87,11 +87,7 @@ async def verify_code(session: AsyncSession, email: str, code: str) -> str:
     auth_code = (await session.execute(stmt)).scalar_one_or_none()
 
     now = datetime.now(timezone.utc)
-    if (
-        auth_code is None
-        or auth_code.expires_at < now
-        or auth_code.attempts >= settings.otp_max_attempts
-    ):
+    if auth_code is None or auth_code.expires_at < now or auth_code.attempts >= settings.otp_max_attempts:
         raise InvalidCodeError("Code is invalid, expired, or exhausted.")
 
     if not await verify_code_hash(code, auth_code.code_hash):

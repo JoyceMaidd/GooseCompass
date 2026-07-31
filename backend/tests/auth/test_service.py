@@ -14,9 +14,7 @@ _EMAIL = "student@uwaterloo.ca"
 def _mock_session(scalar_result=None):
     """Build a mock AsyncSession whose execute() always returns scalar_result."""
     session = MagicMock()
-    session.execute = AsyncMock(
-        return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=scalar_result))
-    )
+    session.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=scalar_result)))
     session.commit = AsyncMock()
     session.add = MagicMock()
     return session

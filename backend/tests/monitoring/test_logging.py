@@ -1,6 +1,6 @@
 """Tests for usage logging."""
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 
 from backend.monitoring.logging import log_usage_to_db
 

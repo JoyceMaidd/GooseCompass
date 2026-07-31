@@ -11,7 +11,6 @@ from openai import AsyncOpenAI
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.auth.dependency import require_auth
 from backend.config import settings
 from backend.db import get_database, get_session
 from backend.generation.models import Citation, CitedParagraph, GeneratedResponse
@@ -150,10 +149,12 @@ async def _stream_paragraph(paragraph: CitedParagraph) -> AsyncIterator[str]:
         await asyncio.sleep(0)  # yield control to the event loop
 
     citations = _dedupe_citations(paragraph.citations)
-    yield await _sse_event({
-        "type": "paragraph_end",
-        "citations": [c.model_dump(exclude_none=True) for c in citations],
-    })
+    yield await _sse_event(
+        {
+            "type": "paragraph_end",
+            "citations": [c.model_dump(exclude_none=True) for c in citations],
+        }
+    )
 
 
 async def _stream_response(response: GeneratedResponse) -> AsyncIterator[str]:

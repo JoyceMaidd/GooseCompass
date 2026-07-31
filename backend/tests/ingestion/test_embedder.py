@@ -4,8 +4,6 @@ These are integration tests that call the real OpenAI API.
 They require OPENAI_API_KEY to be set in .env.
 """
 
-import pytest
-
 from backend.ingestion.embedder import embed_chunks
 from backend.ingestion.models import Chunk, ChunkData
 

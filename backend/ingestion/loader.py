@@ -23,14 +23,8 @@ def _make_pdf_converter() -> DocumentConverter:
         A DocumentConverter with CPU acceleration to avoid MPS float64 issues
         on Apple Silicon.
     """
-    pipeline_options = PdfPipelineOptions(
-        accelerator_options=AcceleratorOptions(device=AcceleratorDevice.CPU)
-    )
-    return DocumentConverter(
-        format_options={
-            InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_options)
-        }
-    )
+    pipeline_options = PdfPipelineOptions(accelerator_options=AcceleratorOptions(device=AcceleratorDevice.CPU))
+    return DocumentConverter(format_options={InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_options)})
 
 
 def _convert_url(url: str) -> DoclingDocument:

@@ -1,8 +1,5 @@
 """Tests for backend/ingestion/chunker.py."""
 
-from pathlib import Path
-
-import pytest
 from docling_core.types.doc import DocItemLabel, DoclingDocument
 
 from backend.ingestion.chunker import chunk_document
@@ -19,20 +16,29 @@ def _make_test_doc() -> DoclingDocument:
     """Build a minimal DoclingDocument with heading/paragraph structure."""
     doc = DoclingDocument(name="exchange-guide")
     doc.add_heading(text="Exchange Information", level=1)
-    doc.add_text(label=DocItemLabel.PARAGRAPH, text=(
-        "This section explains the exchange program requirements and eligibility "
-        "criteria for University of Waterloo students."
-    ))
+    doc.add_text(
+        label=DocItemLabel.PARAGRAPH,
+        text=(
+            "This section explains the exchange program requirements and eligibility "
+            "criteria for University of Waterloo students."
+        ),
+    )
     doc.add_heading(text="GPA Requirements", level=2)
-    doc.add_text(label=DocItemLabel.PARAGRAPH, text=(
-        "Students must maintain a minimum cumulative GPA of 70 percent to be "
-        "eligible. Some partner universities may require higher academic standing."
-    ))
+    doc.add_text(
+        label=DocItemLabel.PARAGRAPH,
+        text=(
+            "Students must maintain a minimum cumulative GPA of 70 percent to be "
+            "eligible. Some partner universities may require higher academic standing."
+        ),
+    )
     doc.add_heading(text="Application Steps", level=2)
-    doc.add_text(label=DocItemLabel.PARAGRAPH, text=(
-        "Submit the online application form at least six months before your "
-        "intended departure. Attach all required documents including transcripts."
-    ))
+    doc.add_text(
+        label=DocItemLabel.PARAGRAPH,
+        text=(
+            "Submit the online application form at least six months before your "
+            "intended departure. Attach all required documents including transcripts."
+        ),
+    )
     return doc
 
 
@@ -40,10 +46,13 @@ def _make_single_heading_doc(name: str) -> DoclingDocument:
     """Build a DoclingDocument with one generic heading, like the real country guides."""
     doc = DoclingDocument(name=name)
     doc.add_heading(text="Tips", level=1)
-    doc.add_text(label=DocItemLabel.PARAGRAPH, text=(
-        "Public transit passes are affordable and widely used by exchange "
-        "students living off campus during their term abroad."
-    ))
+    doc.add_text(
+        label=DocItemLabel.PARAGRAPH,
+        text=(
+            "Public transit passes are affordable and widely used by exchange "
+            "students living off campus during their term abroad."
+        ),
+    )
     return doc
 
 

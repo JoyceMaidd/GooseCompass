@@ -25,7 +25,6 @@ from backend.eval.metrics import build_hard_metrics, build_soft_retrieval_metric
 from backend.eval.pipeline import run_pipeline_for_example
 from backend.eval.scoring import score_test_case
 
-
 _DEFAULT_CONCURRENCY = 5
 
 

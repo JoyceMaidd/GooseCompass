@@ -10,9 +10,7 @@ from backend.generation.models import (
 from backend.generation.prompt import build_prompt
 from backend.retrieval.models import SearchResult
 
-_INSUFFICIENT_CONTEXT_MESSAGE = (
-    "The current context is insufficient to answer the question."
-)
+_INSUFFICIENT_CONTEXT_MESSAGE = "The current context is insufficient to answer the question."
 
 _SNIPPET_MAX_LEN = 150
 
@@ -59,9 +57,7 @@ def _citation_from_chunk(chunk: SearchResult) -> Citation:
     )
 
 
-def _resolve_citations(
-    response: RawGeneratedResponse, chunks: list[SearchResult]
-) -> GeneratedResponse:
+def _resolve_citations(response: RawGeneratedResponse, chunks: list[SearchResult]) -> GeneratedResponse:
     """Replace raw citation references with structured Citation objects.
 
     The LLM is instructed to cite by index number ("1", "[1]") only. Each
@@ -99,9 +95,7 @@ def _resolve_citations(
     return GeneratedResponse(paragraphs=resolved, insufficient_context=response.insufficient_context)
 
 
-async def answer_with_usage(
-    query: str, context_chunks: list[SearchResult]
-) -> tuple[GeneratedResponse, int, int]:
+async def answer_with_usage(query: str, context_chunks: list[SearchResult]) -> tuple[GeneratedResponse, int, int]:
     """Generate a grounded, cited response and return token usage.
 
     Assembles the prompt from the query and context chunks, then runs the
