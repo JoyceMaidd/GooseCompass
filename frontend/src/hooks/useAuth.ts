@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { AuthApiError, requestCode, verifyCode } from '../api/authClient'
-import { clearToken, getToken, setToken } from '../lib/authStorage'
+import { clearToken, getStoredEmail, getToken, setToken } from '../lib/authStorage'
 import type { AuthStep } from '../types'
 
 function requestCodeErrorMessage(status: number): string {
@@ -19,7 +19,7 @@ function verifyCodeErrorMessage(status: number): string {
  *
  * @returns isAuthenticated - True once a token is present (from a prior session or a fresh sign-in).
  * @returns step - Current stage of the sign-in flow: 'email' or 'otp'.
- * @returns email - The email currently being verified.
+ * @returns email - The email currently being verified, or decoded from the stored JWT on page load if already authenticated.
  * @returns isLoading - True while a request-code or verify-code call is in flight.
  * @returns error - Human-readable error from the last failed action, or null.
  * @returns submitEmail - Request an OTP for the given email; advances to 'otp' step on success.
@@ -30,7 +30,7 @@ function verifyCodeErrorMessage(status: number): string {
 export function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => getToken() !== null)
   const [step, setStep] = useState<AuthStep>('email')
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(() => getStoredEmail() ?? '')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 

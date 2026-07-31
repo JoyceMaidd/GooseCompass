@@ -105,6 +105,72 @@ button {
   background-color: var(--color-bubble-ai);
 }
 
+.chat-page__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Profile menu */
+
+.profile-menu {
+  position: relative;
+}
+
+.profile-menu__avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 9999px;
+  border: none;
+  background-color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.profile-menu__avatar:hover {
+  opacity: 0.9;
+}
+
+.profile-menu__dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 10;
+  width: 220px;
+  border-radius: 12px;
+  border: 1px solid var(--color-hairline);
+  background-color: var(--color-surface-input);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  padding: 8px;
+  animation: citation-popover-in 180ms ease-out;
+}
+
+.profile-menu__email {
+  margin: 4px 8px 8px;
+  font-size: 12px;
+  color: var(--color-muted);
+  overflow-wrap: anywhere;
+}
+
+.profile-menu__logout {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-ink);
+}
+
+.profile-menu__logout:hover {
+  background-color: var(--color-bubble-ai);
+}
+
 .chat-page__messages {
   flex: 1;
   overflow-y: auto;

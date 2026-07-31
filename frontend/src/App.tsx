@@ -19,7 +19,7 @@ function App() {
     )
   }
 
-  return <ChatPage />
+  return <ChatPage email={auth.email} onSignOut={auth.signOut} />
 }
 
 export default App
