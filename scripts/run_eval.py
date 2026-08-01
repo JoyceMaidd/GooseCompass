@@ -100,10 +100,7 @@ async def run(concurrency: int = _DEFAULT_CONCURRENCY) -> bool:
         semaphore = asyncio.Semaphore(concurrency)
 
         results = await asyncio.gather(
-            *(
-                _run_example_bounded(semaphore, example, collection, embed_client, judge)
-                for example in examples
-            )
+            *(_run_example_bounded(semaphore, example, collection, embed_client, judge) for example in examples)
         )
     finally:
         await disconnect()

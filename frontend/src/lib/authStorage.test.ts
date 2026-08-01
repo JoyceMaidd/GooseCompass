@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { decodeEmailFromToken, getStoredEmail, setToken, clearToken } from './authStorage'
+import { decodeEmailFromToken, getStoredEmail, setToken } from './authStorage'
 
 describe('authStorage', () => {
   beforeEach(() => {

@@ -38,6 +38,7 @@ def _label(source: dict) -> str:
 async def _ingest_one(source: dict, db, index: int, total: int) -> tuple[dict, int, Exception | None]:
     """Ingest a single source, returning (source, chunk_count, error_or_None)."""
     from backend.ingestion.pipeline import ingest_source
+
     try:
         count = await ingest_source(source, db)
         print(f"  [{index}/{total}] OK  {count:>4} chunks  {_label(source)}")
@@ -92,6 +93,7 @@ async def run(dry_run: bool, prune: bool) -> None:
             return
 
     from backend.db import connect, disconnect, get_database
+
     await connect()
     db = get_database()
 
@@ -99,10 +101,7 @@ async def run(dry_run: bool, prune: bool) -> None:
     try:
         if not dry_run:
             print(f"\nIngesting {total} sources concurrently...\n")
-            tasks = [
-                _ingest_one(source, db, i, total)
-                for i, source in enumerate(sources, 1)
-            ]
+            tasks = [_ingest_one(source, db, i, total) for i, source in enumerate(sources, 1)]
             results = await asyncio.gather(*tasks)
 
             total_chunks = sum(count for _, count, _ in results)
