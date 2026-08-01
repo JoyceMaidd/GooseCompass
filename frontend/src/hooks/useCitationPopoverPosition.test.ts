@@ -3,7 +3,7 @@ import { renderHook, act } from '@testing-library/react'
 import { useCitationPopoverPosition } from './useCitationPopoverPosition'
 
 function stubTrigger(result: ReturnType<typeof useCitationPopoverPosition>, rect: Partial<DOMRect>) {
-  result.triggerRef.current = {
+  ;(result.triggerRef as any).current = {
     getBoundingClientRect: () => rect as DOMRect,
   } as unknown as HTMLButtonElement
 }
