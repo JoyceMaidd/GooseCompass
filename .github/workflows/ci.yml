@@ -87,7 +87,8 @@ jobs:
           --ignore=backend/tests/retrieval/test_text_search.py
           --ignore=backend/tests/retrieval/test_pipeline.py
           --ignore=backend/tests/generation/test_pipeline.py
-          --ignore=backend/tests/generation/test_agent.py
+          --ignore=backend/tests/generation/test_agent.py          
+          --ignore=backend/tests/generation/test_rewriter.py
           --ignore=backend/tests/ingestion/test_embedder.py
           --ignore=backend/tests/ingestion/test_store.py
           --ignore=backend/tests/ingestion/test_pipeline.py
@@ -154,6 +155,7 @@ jobs:
           backend/tests/retrieval/test_pipeline.py
           backend/tests/generation/test_pipeline.py
           backend/tests/generation/test_agent.py
+          backend/tests/generation/test_rewriter.py
           backend/tests/ingestion/test_embedder.py
           backend/tests/ingestion/test_store.py
           backend/tests/ingestion/test_pipeline.py
@@ -187,6 +189,7 @@ jobs:
           OPENROUTER_EVAL_JUDGE_MODEL: ${{ secrets.OPENROUTER_EVAL_JUDGE_MODEL }}
           JWT_SECRET: test-secret
           JWT_EXPIRY_MINUTES: "10080"
+          FRONTEND_ORIGIN: http://localhost:5174
           EMAIL_PROVIDER: resend
           EMAIL_API_KEY: test-key
           EMAIL_FROM: test@example.com
