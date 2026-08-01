@@ -63,18 +63,22 @@ jobs:
           OPENROUTER_API_KEY: test-key
           OPENROUTER_GENERATION_MODEL: test-model
           OPENROUTER_REWRITER_MODEL: test-model
+          OPENROUTER_EVAL_JUDGE_MODEL: test-model
           JWT_SECRET: test-secret
+          JWT_EXPIRY_MINUTES: "10080"
           FRONTEND_ORIGIN: http://localhost:5174
-          VITE_API_URL: http://localhost:8000
           EMAIL_PROVIDER: resend
           EMAIL_API_KEY: test-key
           EMAIL_FROM: test@example.com
-          MONTHLY_SPEND_CAP_USD: 5
-          USER_TOKEN_QUOTA_MONTHLY: 50000
+          OTP_TTL_MINUTES: "10"
+          OTP_MAX_ATTEMPTS: "5"
+          OTP_RESEND_COOLDOWN_SECONDS: "60"
+          OTP_CODE_LENGTH: "6"
+          MONTHLY_SPEND_CAP_USD: "5"
+          USER_MONTHLY_QUOTA_TOKENS: "50000"
           REDIS_URI: redis://localhost:6379
-          RATE_LIMIT_ENABLED: "true"
           RATE_LIMIT_REQUESTS: "5"
-          RATE_LIMIT_PERIOD: "60"
+          RATE_LIMIT_WINDOW_SECONDS: "60"
         run: >
           pytest backend/tests/ -v --tb=short
           --ignore=backend/tests/test_db.py
@@ -127,18 +131,21 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           OPENROUTER_GENERATION_MODEL: ${{ secrets.OPENROUTER_GENERATION_MODEL }}
           OPENROUTER_REWRITER_MODEL: ${{ secrets.OPENROUTER_REWRITER_MODEL }}
+          OPENROUTER_EVAL_JUDGE_MODEL: ${{ secrets.OPENROUTER_EVAL_JUDGE_MODEL }}
           JWT_SECRET: test-secret
-          FRONTEND_ORIGIN: http://localhost:5174
-          VITE_API_URL: http://localhost:8000
+          JWT_EXPIRY_MINUTES: "10080"
           EMAIL_PROVIDER: resend
           EMAIL_API_KEY: ${{ secrets.EMAIL_API_KEY }}
           EMAIL_FROM: test@example.com
-          MONTHLY_SPEND_CAP_USD: 5
-          USER_TOKEN_QUOTA_MONTHLY: 50000
+          OTP_TTL_MINUTES: "10"
+          OTP_MAX_ATTEMPTS: "5"
+          OTP_RESEND_COOLDOWN_SECONDS: "60"
+          OTP_CODE_LENGTH: "6"
+          MONTHLY_SPEND_CAP_USD: "5"
+          USER_MONTHLY_QUOTA_TOKENS: "50000"
           REDIS_URI: redis://localhost:6379
-          RATE_LIMIT_ENABLED: "true"
           RATE_LIMIT_REQUESTS: "5"
-          RATE_LIMIT_PERIOD: "60"
+          RATE_LIMIT_WINDOW_SECONDS: "60"
         run: >
           pytest backend/tests/test_db.py
           backend/tests/eval/test_metrics.py
@@ -177,19 +184,22 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           OPENROUTER_GENERATION_MODEL: ${{ github.event.inputs.model_override || secrets.OPENROUTER_GENERATION_MODEL }}
           OPENROUTER_REWRITER_MODEL: ${{ secrets.OPENROUTER_REWRITER_MODEL }}
+          OPENROUTER_EVAL_JUDGE_MODEL: ${{ secrets.OPENROUTER_EVAL_JUDGE_MODEL }}
           JWT_SECRET: test-secret
-          FRONTEND_ORIGIN: http://localhost:5174
-          VITE_API_URL: http://localhost:8000
-          POSTGRES_URI: postgresql://localhost:5432/postgres
+          JWT_EXPIRY_MINUTES: "10080"
           EMAIL_PROVIDER: resend
           EMAIL_API_KEY: test-key
           EMAIL_FROM: test@example.com
-          MONTHLY_SPEND_CAP_USD: 5
-          USER_TOKEN_QUOTA_MONTHLY: 50000
+          OTP_TTL_MINUTES: "10"
+          OTP_MAX_ATTEMPTS: "5"
+          OTP_RESEND_COOLDOWN_SECONDS: "60"
+          OTP_CODE_LENGTH: "6"
+          POSTGRES_URI: postgresql://localhost:5432/postgres
+          MONTHLY_SPEND_CAP_USD: "5"
+          USER_MONTHLY_QUOTA_TOKENS: "50000"
           REDIS_URI: redis://localhost:6379
-          RATE_LIMIT_ENABLED: "true"
           RATE_LIMIT_REQUESTS: "5"
-          RATE_LIMIT_PERIOD: "60"
+          RATE_LIMIT_WINDOW_SECONDS: "60"
         run: python scripts/run_eval.py
       - name: Report eval results
         if: always()
