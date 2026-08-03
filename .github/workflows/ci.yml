@@ -150,7 +150,6 @@ jobs:
           RATE_LIMIT_WINDOW_SECONDS: "60"
         run: >
           pytest backend/tests/test_db.py
-          backend/tests/eval/test_metrics.py
           backend/tests/retrieval/test_vector_search.py
           backend/tests/retrieval/test_text_search.py
           backend/tests/retrieval/test_pipeline.py
@@ -164,6 +163,7 @@ jobs:
           backend/tests/api/test_query.py
           backend/tests/api/test_stream.py
           -v --tb=short
+          --ignore=backend/tests/eval/test_metrics.py
 
   backend-eval:
     needs: changes
