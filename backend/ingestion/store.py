@@ -35,9 +35,7 @@ async def upsert_chunks(chunks: list[Chunk], collection: AsyncIOMotorCollection)
     return result.upserted_count + result.modified_count
 
 
-async def prune_stale_chunks(
-    current_urls: set[str], collection: AsyncIOMotorCollection
-) -> int:
+async def prune_stale_chunks(current_urls: set[str], collection: AsyncIOMotorCollection) -> int:
     """Delete chunks whose source_url is no longer among the current sources.
 
     Args:

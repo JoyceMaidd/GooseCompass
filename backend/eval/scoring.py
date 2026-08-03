@@ -37,15 +37,12 @@ async def score_test_case(
         AssertionError: If any hard metric falls below its threshold.
     """
     all_metrics = hard_metrics + soft_metrics
-    await asyncio.gather(
-        *(metric.a_measure(test_case, _show_indicator=False) for metric in all_metrics)
-    )
+    await asyncio.gather(*(metric.a_measure(test_case, _show_indicator=False) for metric in all_metrics))
 
     failed = [metric for metric in hard_metrics if not metric.is_successful()]
     if failed:
         details = ", ".join(
-            f"{metric.__name__} (score: {metric.score:.2f}, threshold: {metric.threshold})"
-            for metric in failed
+            f"{metric.__name__} (score: {metric.score:.2f}, threshold: {metric.threshold})" for metric in failed
         )
         raise AssertionError(f"Metrics: {details} failed.")
 

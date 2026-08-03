@@ -29,7 +29,10 @@ class TestIngestSource:
         monkeypatch.setattr(settings, "mongodb_collection_chunks", _TEST_COLLECTION)
         db = clean_collection
         count = await ingest_source(
-            {"type": "web", "url": "https://uwaterloo.ca/international-experience/exchange-and-study-abroad/go-abroad/getting-started"},
+            {
+                "type": "web",
+                "url": "https://uwaterloo.ca/international-experience/exchange-and-study-abroad/go-abroad/getting-started",
+            },
             db,
         )
         assert count > 0
@@ -38,7 +41,10 @@ class TestIngestSource:
         monkeypatch.setattr(settings, "mongodb_collection_chunks", _TEST_COLLECTION)
         db = clean_collection
         await ingest_source(
-            {"type": "web", "url": "https://uwaterloo.ca/international-experience/exchange-and-study-abroad/go-abroad/getting-started"},
+            {
+                "type": "web",
+                "url": "https://uwaterloo.ca/international-experience/exchange-and-study-abroad/go-abroad/getting-started",
+            },
             db,
         )
         total = await db[_TEST_COLLECTION].count_documents({})
@@ -48,7 +54,10 @@ class TestIngestSource:
         monkeypatch.setattr(settings, "mongodb_collection_chunks", _TEST_COLLECTION)
         db = clean_collection
         await ingest_source(
-            {"type": "web", "url": "https://uwaterloo.ca/international-experience/exchange-and-study-abroad/go-abroad/getting-started"},
+            {
+                "type": "web",
+                "url": "https://uwaterloo.ca/international-experience/exchange-and-study-abroad/go-abroad/getting-started",
+            },
             db,
         )
         doc = await db[_TEST_COLLECTION].find_one({})
@@ -60,7 +69,10 @@ class TestIngestSource:
     async def test_idempotent_reingest(self, clean_collection, monkeypatch):
         monkeypatch.setattr(settings, "mongodb_collection_chunks", _TEST_COLLECTION)
         db = clean_collection
-        source = {"type": "web", "url": "https://uwaterloo.ca/international-experience/exchange-and-study-abroad/go-abroad/getting-started"}
+        source = {
+            "type": "web",
+            "url": "https://uwaterloo.ca/international-experience/exchange-and-study-abroad/go-abroad/getting-started",
+        }
         await ingest_source(source, db)
         first_total = await db[_TEST_COLLECTION].count_documents({})
         await ingest_source(source, db)

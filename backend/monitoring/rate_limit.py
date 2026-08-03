@@ -5,6 +5,7 @@ from slowapi.util import get_remote_address
 
 from backend.config import settings
 
+
 def _get_rate_limit_string() -> str:
     """Convert window_seconds to appropriate granularity for limits library."""
     if settings.rate_limit_window_seconds == 1:

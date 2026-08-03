@@ -38,16 +38,8 @@ def build_prompt(query: str, context_chunks: list[SearchResult]) -> str:
     context_lines: list[str] = []
     for i, chunk in enumerate(context_chunks, start=1):
         context_lines.append(
-            f"[{i}] {chunk.document_title} — {chunk.section_title}\n"
-            f"Source: {chunk.source_url}\n"
-            f"{chunk.content}"
+            f"[{i}] {chunk.document_title} — {chunk.section_title}\nSource: {chunk.source_url}\n{chunk.content}"
         )
     context_section = "\n\n".join(context_lines)
 
-    return (
-        f"{_SYSTEM_INSTRUCTION}\n\n"
-        f"--- CONTEXT ---\n\n"
-        f"{context_section}\n\n"
-        f"--- QUESTION ---\n\n"
-        f"{query}"
-    )
+    return f"{_SYSTEM_INSTRUCTION}\n\n--- CONTEXT ---\n\n{context_section}\n\n--- QUESTION ---\n\n{query}"

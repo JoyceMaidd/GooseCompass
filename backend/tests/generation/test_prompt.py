@@ -1,6 +1,6 @@
 """Tests for the prompt builder."""
 
-from backend.generation.prompt import build_prompt, _SYSTEM_INSTRUCTION
+from backend.generation.prompt import _SYSTEM_INSTRUCTION, build_prompt
 from backend.retrieval.models import SearchResult
 
 

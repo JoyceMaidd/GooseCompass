@@ -47,6 +47,4 @@ async def test_rewrite_query_uses_institutional_terms():
     lower = result.lower()
     # Should contain at least one relevant institutional/academic term
     relevant_terms = ["eth", "gpa", "grade", "eligib", "exchange", "waterloo", "requirement"]
-    assert any(term in lower for term in relevant_terms), (
-        f"No institutional terms found in rewritten query: '{result}'"
-    )
+    assert any(term in lower for term in relevant_terms), f"No institutional terms found in rewritten query: '{result}'"

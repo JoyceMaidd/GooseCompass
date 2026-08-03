@@ -126,7 +126,7 @@ describe('queryStreaming', () => {
 
     await queryStreaming('What GPA?', onToken, onParagraphEnd, onDone)
 
-    expect(order.at(-1)).toBe('done')
+    expect(order[order.length - 1]).toBe('done')
     expect(order.filter(e => e === 'token').length).toBe(3)
   })
 

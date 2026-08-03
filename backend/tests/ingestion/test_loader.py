@@ -5,7 +5,6 @@ reads a fixture file from disk, and load_html reads a fixture file from
 disk. All require Docling to be installed.
 """
 
-import os
 from pathlib import Path
 
 import pytest

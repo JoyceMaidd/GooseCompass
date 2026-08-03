@@ -8,19 +8,47 @@ import json
 
 import pytest
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy import delete, select
 
+import backend.db
 from backend.api.app import app
 from backend.api.routes.query import _stream_response
+from backend.auth.models import User
 from backend.auth.tokens import create_session_token
-from backend.db import connect, disconnect
+from backend.db import connect, connect_postgres, disconnect, disconnect_postgres
 from backend.generation.models import Citation, CitedParagraph, GeneratedResponse
+from backend.monitoring.models import UsageLog
 
 
 @pytest.fixture(autouse=True)
 async def db_connection():
     await connect()
+    await connect_postgres()
+
+    sessionmaker = backend.db._pg_sessionmaker
+    if sessionmaker is not None:
+        async with sessionmaker() as session:
+            existing = await session.execute(select(User).where(User.email == "student@uwaterloo.ca"))
+            user = existing.scalar_one_or_none()
+            if user is None:
+                user = User(email="student@uwaterloo.ca")
+                session.add(user)
+                await session.commit()
+                await session.refresh(user)
+
+            await session.execute(delete(UsageLog).where(UsageLog.user_id == user.id))
+            await session.commit()
+
     yield
-    await disconnect()
+
+    try:
+        await disconnect_postgres()
+    except Exception:
+        pass
+    try:
+        await disconnect()
+    except Exception:
+        pass
 
 
 _AUTH_HEADERS = {"Authorization": f"Bearer {create_session_token('student@uwaterloo.ca')}"}
@@ -38,7 +66,7 @@ def _parse_sse(raw: str) -> list[dict]:
     events = []
     for line in raw.splitlines():
         if line.startswith("data: "):
-            events.append(json.loads(line[len("data: "):]))
+            events.append(json.loads(line[len("data: ") :]))
     return events
 
 
@@ -105,7 +133,7 @@ async def test_stream_response_paragraph_end_count_matches_paragraphs():
         ]
     )
 
-    events = [json.loads(raw[len("data: "):].strip()) async for raw in _stream_response(response)]
+    events = [json.loads(raw[len("data: ") :].strip()) async for raw in _stream_response(response)]
 
     paragraph_ends = [e for e in events if e["type"] == "paragraph_end"]
     assert len(paragraph_ends) == 2
@@ -130,7 +158,7 @@ async def test_stream_response_dedupes_citations_per_paragraph():
         ]
     )
 
-    events = [json.loads(raw[len("data: "):].strip()) async for raw in _stream_response(response)]
+    events = [json.loads(raw[len("data: ") :].strip()) async for raw in _stream_response(response)]
 
     paragraph_ends = [e for e in events if e["type"] == "paragraph_end"]
     assert [c["id"] for c in paragraph_ends[0]["citations"]] == ["a", "b"]
@@ -148,7 +176,7 @@ async def test_stream_response_citation_shape_omits_none_fields():
         ]
     )
 
-    events = [json.loads(raw[len("data: "):].strip()) async for raw in _stream_response(response)]
+    events = [json.loads(raw[len("data: ") :].strip()) async for raw in _stream_response(response)]
 
     paragraph_ends = [e for e in events if e["type"] == "paragraph_end"]
     citation = paragraph_ends[0]["citations"][0]

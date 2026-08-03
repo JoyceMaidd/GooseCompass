@@ -24,8 +24,7 @@ LIST_URL = f"{BASE_URL}/index.php"
 PAGE_SIZE_PARAM = "_so_list_aat5ad5a89179cb63f89c2de5a1bb7ce758"
 DETAIL_URL_PREFIX = f"{BASE_URL}/index.php?s=programs&mode=form&id="
 USER_AGENT = (
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
-    "(KHTML, like Gecko) Chrome/120.0 Safari/537.36"
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
 )
 
 ITEMS_OF_RE = re.compile(r"Items\s+[\d,]+-[\d,]+\s+of\s+([\d,]+)")
@@ -54,9 +53,7 @@ def _fetch_school_links(client: httpx.Client) -> list[tuple[str, str]]:
     """
     page_size = INITIAL_PAGE_SIZE
     while page_size <= MAX_PAGE_SIZE:
-        resp = client.get(
-            LIST_URL, params={"s": "programs", PAGE_SIZE_PARAM: page_size}
-        )
+        resp = client.get(LIST_URL, params={"s": "programs", PAGE_SIZE_PARAM: page_size})
         resp.raise_for_status()
         soup = BeautifulSoup(resp.text, "html.parser")
 
@@ -83,10 +80,7 @@ def _fetch_school_links(client: httpx.Client) -> list[tuple[str, str]]:
 
         page_size *= 2
 
-    raise RuntimeError(
-        f"Passport listing reports more than {MAX_PAGE_SIZE} schools; "
-        "increase MAX_PAGE_SIZE."
-    )
+    raise RuntimeError(f"Passport listing reports more than {MAX_PAGE_SIZE} schools; increase MAX_PAGE_SIZE.")
 
 
 def _load_existing_sources() -> list[dict]:
@@ -108,9 +102,7 @@ def _load_existing_sources() -> list[dict]:
         sys.exit(1)
 
 
-def _sync_sources(
-    existing: list[dict], schools: list[tuple[str, str]]
-) -> tuple[list[dict], list[str], list[str]]:
+def _sync_sources(existing: list[dict], schools: list[tuple[str, str]]) -> tuple[list[dict], list[str], list[str]]:
     """Merge freshly scraped schools into the existing sources list.
 
     Args:
@@ -121,14 +113,9 @@ def _sync_sources(
         Tuple of (new sources list, added urls, removed urls).
     """
     kept = [s for s in existing if not s.get("url", "").startswith(DETAIL_URL_PREFIX)]
-    old_passport_urls = {
-        s["url"] for s in existing if s.get("url", "").startswith(DETAIL_URL_PREFIX)
-    }
+    old_passport_urls = {s["url"] for s in existing if s.get("url", "").startswith(DETAIL_URL_PREFIX)}
 
-    new_entries = [
-        {"type": "web", "url": f"{DETAIL_URL_PREFIX}{school_id}"}
-        for school_id, _ in schools
-    ]
+    new_entries = [{"type": "web", "url": f"{DETAIL_URL_PREFIX}{school_id}"} for school_id, _ in schools]
     new_passport_urls = {entry["url"] for entry in new_entries}
 
     added = sorted(new_passport_urls - old_passport_urls)
@@ -160,9 +147,7 @@ def main() -> None:
     args = parser.parse_args()
 
     print("Fetching Passport exchange-school listing...")
-    with httpx.Client(
-        follow_redirects=True, headers={"User-Agent": USER_AGENT}, timeout=30
-    ) as client:
+    with httpx.Client(follow_redirects=True, headers={"User-Agent": USER_AGENT}, timeout=30) as client:
         schools = _fetch_school_links(client)
     print(f"Found {len(schools)} schools.")
 

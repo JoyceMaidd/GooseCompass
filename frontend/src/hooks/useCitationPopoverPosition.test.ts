@@ -1,9 +1,10 @@
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
+import type { MutableRefObject } from 'react'
 import { useCitationPopoverPosition } from './useCitationPopoverPosition'
 
 function stubTrigger(result: ReturnType<typeof useCitationPopoverPosition>, rect: Partial<DOMRect>) {
-  result.triggerRef.current = {
+  (result.triggerRef as MutableRefObject<HTMLButtonElement | null>).current = {
     getBoundingClientRect: () => rect as DOMRect,
   } as unknown as HTMLButtonElement
 }

@@ -38,6 +38,7 @@ def _label(source: dict) -> str:
 async def _ingest_one(source: dict, db, index: int, total: int) -> tuple[dict, int, Exception | None]:
     """Ingest a single source, returning (source, chunk_count, error_or_None)."""
     from backend.ingestion.pipeline import ingest_source
+
     try:
         count = await ingest_source(source, db)
         print(f"  [{index}/{total}] OK  {count:>4} chunks  {_label(source)}")
@@ -70,7 +71,49 @@ async def _prune(sources: list[dict], db, dry_run: bool) -> None:
     print(f"\nPruned {deleted} stale chunk(s) no longer in {SOURCES_FILE}.")
 
 
-async def run(dry_run: bool, prune: bool) -> None:
+def _filter_sources(all_sources: list[dict], source_specs: list[str] | None) -> list[dict]:
+    """Filter sources by index (1-based) or URL/path.
+
+    Args:
+        all_sources: All available sources.
+        source_specs: List of source identifiers (indices or URLs/paths), or None for all.
+
+    Returns:
+        Filtered list of sources.
+
+    Raises:
+        SystemExit: If a spec doesn't match any source.
+    """
+    if not source_specs:
+        return all_sources
+
+    filtered = []
+    for spec in source_specs:
+        # Try as 1-based index first
+        try:
+            idx = int(spec) - 1
+            if 0 <= idx < len(all_sources):
+                filtered.append(all_sources[idx])
+                continue
+        except ValueError:
+            pass
+
+        # Try as URL or path
+        found = False
+        for source in all_sources:
+            if source.get("url") == spec or source.get("path") == spec:
+                filtered.append(source)
+                found = True
+                break
+
+        if not found:
+            print(f"ERROR: source not found: {spec}", file=sys.stderr)
+            sys.exit(1)
+
+    return filtered
+
+
+async def run(dry_run: bool, prune: bool, source_specs: list[str] | None = None) -> None:
     """Main async entry point.
 
     Args:
@@ -78,38 +121,50 @@ async def run(dry_run: bool, prune: bool) -> None:
             ingesting or deleting anything.
         prune: If True, after ingesting, delete chunks whose source is no
             longer present in sources.json.
+        source_specs: List of source identifiers (indices or URLs/paths) to ingest,
+            or None to ingest all sources.
     """
-    sources = _load_sources()
-    total = len(sources)
-    print(f"Sources: {total} found in {SOURCES_FILE}")
+    all_sources = _load_sources()
+    sources = _filter_sources(all_sources, source_specs)
+    total = len(all_sources)
+    selected = len(sources)
+
+    if source_specs:
+        print(f"Sources: {selected}/{total} selected from {SOURCES_FILE}")
+    else:
+        print(f"Sources: {total} found in {SOURCES_FILE}")
+
+    if selected < total and prune:
+        print("WARNING: --prune is ignored when specific sources are selected (use no --source to prune all)\n")
+        prune = False
 
     if dry_run:
         print("\n-- dry-run mode: no ingestion performed --\n")
-        for i, source in enumerate(sources, 1):
+        for source in sources:
+            # Show original index from all_sources for reference
+            original_idx = all_sources.index(source) + 1
             kind = source.get("type", "?").upper()
-            print(f"  {i:>2}. [{kind}] {_label(source)}")
+            print(f"  {original_idx:>2}. [{kind}] {_label(source)}")
         if not prune:
             return
 
     from backend.db import connect, disconnect, get_database
+
     await connect()
     db = get_database()
 
     had_errors = False
     try:
         if not dry_run:
-            print(f"\nIngesting {total} sources concurrently...\n")
-            tasks = [
-                _ingest_one(source, db, i, total)
-                for i, source in enumerate(sources, 1)
-            ]
+            print(f"\nIngesting {selected} sources concurrently...\n")
+            tasks = [_ingest_one(source, db, i, selected) for i, source in enumerate(sources, 1)]
             results = await asyncio.gather(*tasks)
 
             total_chunks = sum(count for _, count, _ in results)
             errors = [src for src, _, err in results if err is not None]
             had_errors = bool(errors)
 
-            print(f"\nDone. {total_chunks} chunks stored across {total - len(errors)}/{total} sources.")
+            print(f"\nDone. {total_chunks} chunks stored across {selected - len(errors)}/{selected} sources.")
             if errors:
                 print(f"  {len(errors)} source(s) failed:", file=sys.stderr)
                 for src in errors:
@@ -141,8 +196,17 @@ def main() -> None:
             "without deleting."
         ),
     )
+    parser.add_argument(
+        "--source",
+        action="append",
+        dest="sources",
+        help=(
+            "Ingest a specific source by 1-based index or URL/path. "
+            "Can be repeated to select multiple sources. Omit to ingest all."
+        ),
+    )
     args = parser.parse_args()
-    asyncio.run(run(dry_run=args.dry_run, prune=args.prune))
+    asyncio.run(run(dry_run=args.dry_run, prune=args.prune, source_specs=args.sources))
 
 
 if __name__ == "__main__":

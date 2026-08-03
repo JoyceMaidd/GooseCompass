@@ -6,17 +6,45 @@ OpenAI embeddings API, and OpenRouter generation API.
 
 import pytest
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy import delete, select
 
+import backend.db
 from backend.api.app import app
+from backend.auth.models import User
 from backend.auth.tokens import create_session_token
-from backend.db import connect, disconnect
+from backend.db import connect, connect_postgres, disconnect, disconnect_postgres
+from backend.monitoring.models import UsageLog
 
 
 @pytest.fixture(autouse=True)
 async def db_connection():
     await connect()
+    await connect_postgres()
+
+    sessionmaker = backend.db._pg_sessionmaker
+    if sessionmaker is not None:
+        async with sessionmaker() as session:
+            existing = await session.execute(select(User).where(User.email == "student@uwaterloo.ca"))
+            user = existing.scalar_one_or_none()
+            if user is None:
+                user = User(email="student@uwaterloo.ca")
+                session.add(user)
+                await session.commit()
+                await session.refresh(user)
+
+            await session.execute(delete(UsageLog).where(UsageLog.user_id == user.id))
+            await session.commit()
+
     yield
-    await disconnect()
+
+    try:
+        await disconnect_postgres()
+    except Exception:
+        pass
+    try:
+        await disconnect()
+    except Exception:
+        pass
 
 
 _AUTH_HEADERS = {"Authorization": f"Bearer {create_session_token('student@uwaterloo.ca')}"}

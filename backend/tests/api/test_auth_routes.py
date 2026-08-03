@@ -47,9 +47,7 @@ async def test_request_code_cooldown_returns_429(mocker):
 async def test_verify_code_success_returns_token(mocker):
     mocker.patch("backend.api.routes.auth.service.verify_code", return_value="fake.jwt.token")
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        response = await client.post(
-            "/auth/verify-code", json={"email": "student@uwaterloo.ca", "code": "123456"}
-        )
+        response = await client.post("/auth/verify-code", json={"email": "student@uwaterloo.ca", "code": "123456"})
     assert response.status_code == 200
     body = response.json()
     assert body["access_token"] == "fake.jwt.token"
@@ -62,7 +60,5 @@ async def test_verify_code_invalid_returns_401(mocker):
         side_effect=service.InvalidCodeError("Code is invalid, expired, or exhausted."),
     )
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        response = await client.post(
-            "/auth/verify-code", json={"email": "student@uwaterloo.ca", "code": "000000"}
-        )
+        response = await client.post("/auth/verify-code", json={"email": "student@uwaterloo.ca", "code": "000000"})
     assert response.status_code == 401

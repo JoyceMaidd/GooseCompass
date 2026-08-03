@@ -99,9 +99,7 @@ class TestCitedParagraph:
 class TestGeneratedResponse:
     def test_valid_construction(self):
         response = GeneratedResponse(
-            paragraphs=[
-                CitedParagraph(text="Answer here.", citations=[Citation(id="a", title="A")])
-            ],
+            paragraphs=[CitedParagraph(text="Answer here.", citations=[Citation(id="a", title="A")])],
         )
         assert len(response.paragraphs) == 1
         assert response.insufficient_context is False

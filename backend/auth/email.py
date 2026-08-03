@@ -28,10 +28,7 @@ async def send_otp_email(to_email: str, code: str) -> None:
                 "from": settings.email_from,
                 "to": [to_email],
                 "subject": "Your GooseCompass verification code",
-                "text": (
-                    f"Your verification code is {code}. "
-                    f"It expires in {settings.otp_ttl_minutes} minutes."
-                ),
+                "text": (f"Your verification code is {code}. It expires in {settings.otp_ttl_minutes} minutes."),
             },
         )
         response.raise_for_status()

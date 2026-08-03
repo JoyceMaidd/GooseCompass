@@ -25,7 +25,6 @@ from backend.eval.metrics import build_hard_metrics, build_soft_retrieval_metric
 from backend.eval.pipeline import run_pipeline_for_example
 from backend.eval.scoring import score_test_case
 
-
 _DEFAULT_CONCURRENCY = 5
 
 
@@ -101,10 +100,7 @@ async def run(concurrency: int = _DEFAULT_CONCURRENCY) -> bool:
         semaphore = asyncio.Semaphore(concurrency)
 
         results = await asyncio.gather(
-            *(
-                _run_example_bounded(semaphore, example, collection, embed_client, judge)
-                for example in examples
-            )
+            *(_run_example_bounded(semaphore, example, collection, embed_client, judge) for example in examples)
         )
     finally:
         await disconnect()

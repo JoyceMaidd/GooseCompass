@@ -9,11 +9,10 @@ through Settings explicitly (as this wrapper does) sidesteps that gap.
 import asyncio
 import time
 
-from openai import AsyncOpenAI, OpenAI
-from pydantic import BaseModel
-
 from deepeval.metrics.utils import trimAndLoadJson
 from deepeval.models.base_model import DeepEvalBaseLLM
+from openai import AsyncOpenAI, OpenAI
+from pydantic import BaseModel
 
 from backend.config import settings
 
@@ -33,9 +32,7 @@ class OpenRouterJudgeModel(DeepEvalBaseLLM):
         """
         self._model_name = model_name
         self._client = OpenAI(base_url=_OPENROUTER_BASE_URL, api_key=settings.openrouter_api_key)
-        self._async_client = AsyncOpenAI(
-            base_url=_OPENROUTER_BASE_URL, api_key=settings.openrouter_api_key
-        )
+        self._async_client = AsyncOpenAI(base_url=_OPENROUTER_BASE_URL, api_key=settings.openrouter_api_key)
         super().__init__(model_name)
 
     def load_model(self) -> OpenAI:

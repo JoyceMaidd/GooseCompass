@@ -1,0 +1,239 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      model_override:
+        description: 'Optional OPENROUTER_GENERATION_MODEL override for this run'
+        required: false
+        type: string
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      live_relevant: ${{ steps.filter.outputs.live_relevant }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            live_relevant:
+              - 'backend/retrieval/**'
+              - 'backend/generation/**'
+              - 'backend/ingestion/**'
+              - 'backend/config.py'
+              - '.env.example'
+              - 'backend/tests/eval/**'
+
+  backend-unit-tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: goosecompass_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+      - name: Run unit tests (mocked, no live services)
+        env:
+          POSTGRES_URI: postgresql://postgres:test@localhost:5432/goosecompass_test
+          MONGODB_URI: mongodb://localhost:27017
+          MONGODB_DB_NAME: goosecompass_test
+          MONGODB_COLLECTION_CHUNKS: chunks_test
+          OPENAI_API_KEY: sk-test-key
+          OPENROUTER_API_KEY: test-key
+          OPENROUTER_GENERATION_MODEL: test-model
+          OPENROUTER_REWRITER_MODEL: test-model
+          OPENROUTER_EVAL_JUDGE_MODEL: test-model
+          JWT_SECRET: test-secret
+          JWT_EXPIRY_MINUTES: "10080"
+          FRONTEND_ORIGIN: http://localhost:5174
+          EMAIL_PROVIDER: resend
+          EMAIL_API_KEY: test-key
+          EMAIL_FROM: test@example.com
+          OTP_TTL_MINUTES: "10"
+          OTP_MAX_ATTEMPTS: "5"
+          OTP_RESEND_COOLDOWN_SECONDS: "60"
+          OTP_CODE_LENGTH: "6"
+          MONTHLY_SPEND_CAP_USD: "5"
+          USER_MONTHLY_QUOTA_TOKENS: "50000"
+          REDIS_URI: redis://localhost:6379
+          RATE_LIMIT_REQUESTS: "5"
+          RATE_LIMIT_WINDOW_SECONDS: "60"
+        run: >
+          pytest backend/tests/ -v --tb=short
+          --ignore=backend/tests/test_db.py
+          --ignore=backend/tests/eval/test_metrics.py
+          --ignore=backend/tests/retrieval/test_vector_search.py
+          --ignore=backend/tests/retrieval/test_text_search.py
+          --ignore=backend/tests/retrieval/test_pipeline.py
+          --ignore=backend/tests/generation/test_pipeline.py
+          --ignore=backend/tests/generation/test_agent.py          
+          --ignore=backend/tests/generation/test_rewriter.py
+          --ignore=backend/tests/ingestion/test_embedder.py
+          --ignore=backend/tests/ingestion/test_store.py
+          --ignore=backend/tests/ingestion/test_pipeline.py
+          --ignore=backend/tests/ingestion/test_loader.py
+          --ignore=backend/tests/api/test_query.py
+          --ignore=backend/tests/api/test_stream.py
+
+  backend-live-tests:
+    needs: changes
+    if: needs.changes.outputs.live_relevant == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: goosecompass_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+      - name: Run live integration tests
+        env:
+          POSTGRES_URI: postgresql://postgres:test@localhost:5432/goosecompass_test
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          MONGODB_DB_NAME: ${{ secrets.MONGODB_DB_NAME }}
+          MONGODB_COLLECTION_CHUNKS: ${{ secrets.MONGODB_COLLECTION_CHUNKS }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENROUTER_GENERATION_MODEL: ${{ secrets.OPENROUTER_GENERATION_MODEL }}
+          OPENROUTER_REWRITER_MODEL: ${{ secrets.OPENROUTER_REWRITER_MODEL }}
+          OPENROUTER_EVAL_JUDGE_MODEL: ${{ secrets.OPENROUTER_EVAL_JUDGE_MODEL }}
+          JWT_SECRET: test-secret
+          JWT_EXPIRY_MINUTES: "10080"
+          FRONTEND_ORIGIN: http://localhost:5174
+          EMAIL_PROVIDER: resend
+          EMAIL_API_KEY: ${{ secrets.EMAIL_API_KEY }}
+          EMAIL_FROM: test@example.com
+          OTP_TTL_MINUTES: "10"
+          OTP_MAX_ATTEMPTS: "5"
+          OTP_RESEND_COOLDOWN_SECONDS: "60"
+          OTP_CODE_LENGTH: "6"
+          MONTHLY_SPEND_CAP_USD: "5"
+          USER_MONTHLY_QUOTA_TOKENS: "50000"
+          REDIS_URI: redis://localhost:6379
+          RATE_LIMIT_REQUESTS: "5"
+          RATE_LIMIT_WINDOW_SECONDS: "60"
+        run: >
+          pytest backend/tests/test_db.py
+          backend/tests/retrieval/test_vector_search.py
+          backend/tests/retrieval/test_text_search.py
+          backend/tests/retrieval/test_pipeline.py
+          backend/tests/generation/test_pipeline.py
+          backend/tests/generation/test_agent.py
+          backend/tests/generation/test_rewriter.py
+          backend/tests/ingestion/test_embedder.py
+          backend/tests/ingestion/test_store.py
+          backend/tests/ingestion/test_pipeline.py
+          backend/tests/ingestion/test_loader.py
+          backend/tests/api/test_query.py
+          backend/tests/api/test_stream.py
+          -v --tb=short
+          --ignore=backend/tests/eval/test_metrics.py
+
+  backend-eval:
+    needs: changes
+    if: needs.changes.outputs.live_relevant == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+      - name: Run DeepEval pipeline
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          MONGODB_DB_NAME: ${{ secrets.MONGODB_DB_NAME }}
+          MONGODB_COLLECTION_CHUNKS: ${{ secrets.MONGODB_COLLECTION_CHUNKS }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENROUTER_GENERATION_MODEL: ${{ github.event.inputs.model_override || secrets.OPENROUTER_GENERATION_MODEL }}
+          OPENROUTER_REWRITER_MODEL: ${{ secrets.OPENROUTER_REWRITER_MODEL }}
+          OPENROUTER_EVAL_JUDGE_MODEL: ${{ secrets.OPENROUTER_EVAL_JUDGE_MODEL }}
+          JWT_SECRET: test-secret
+          JWT_EXPIRY_MINUTES: "10080"
+          FRONTEND_ORIGIN: http://localhost:5174
+          EMAIL_PROVIDER: resend
+          EMAIL_API_KEY: test-key
+          EMAIL_FROM: test@example.com
+          OTP_TTL_MINUTES: "10"
+          OTP_MAX_ATTEMPTS: "5"
+          OTP_RESEND_COOLDOWN_SECONDS: "60"
+          OTP_CODE_LENGTH: "6"
+          POSTGRES_URI: postgresql://localhost:5432/postgres
+          MONTHLY_SPEND_CAP_USD: "5"
+          USER_MONTHLY_QUOTA_TOKENS: "50000"
+          REDIS_URI: redis://localhost:6379
+          RATE_LIMIT_REQUESTS: "5"
+          RATE_LIMIT_WINDOW_SECONDS: "60"
+        run: python scripts/run_eval.py
+      - name: Report eval results
+        if: always()
+        run: echo "Eval metrics — check job logs for hard-gate (Answer Relevancy, Faithfulness) and soft-gate (Contextual Precision/Recall/Relevancy) results"
+
+  backend-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+      - name: Lint with ruff
+        run: ruff check . && ruff format --check .
+
+  frontend-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+      - name: Install dependencies
+        run: cd frontend && npm install
+      - name: Run ESLint
+        run: cd frontend && npm run lint
+      - name: Type check
+        run: cd frontend && npm run build

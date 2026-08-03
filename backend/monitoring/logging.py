@@ -31,10 +31,9 @@ async def log_usage_to_db(
         latency_ms: Request latency in milliseconds.
     """
     total_tokens = input_tokens + output_tokens
-    cost_usd = (
-        (input_tokens / 1_000_000) * _GENERATION_INPUT_COST_PER_1M_USD
-        + (output_tokens / 1_000_000) * _GENERATION_OUTPUT_COST_PER_1M_USD
-    )
+    cost_usd = (input_tokens / 1_000_000) * _GENERATION_INPUT_COST_PER_1M_USD + (
+        output_tokens / 1_000_000
+    ) * _GENERATION_OUTPUT_COST_PER_1M_USD
 
     log_entry = UsageLog(
         user_id=user_id,
