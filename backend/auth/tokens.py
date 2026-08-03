@@ -39,5 +39,10 @@ def decode_session_token(token: str) -> str:
     Raises:
         jwt.InvalidTokenError: If the token is expired, tampered with, or malformed.
     """
-    payload = jwt.decode(token, settings.jwt_secret, algorithms=[_ALGORITHM])
+    payload = jwt.decode(
+        token,
+        settings.jwt_secret,
+        algorithms=[_ALGORITHM],
+        options={"verify_signature": True},
+    )
     return payload["sub"]
