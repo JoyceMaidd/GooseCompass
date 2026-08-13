@@ -1,0 +1,91 @@
+services:
+  - type: web
+    name: goosecompass-backend
+    runtime: python
+    pythonVersion: 3.11
+    buildCommand: pip install -e . && alembic upgrade head
+    startCommand: uvicorn backend.api.app:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: 1
+      - key: DATABASE_URL
+        fromDatabase:
+          name: postgres
+          property: connectionString
+      - key: POSTGRES_URI
+        fromDatabase:
+          name: postgres
+          property: connectionString
+      - key: MONGODB_URI
+        sync: false
+      - key: MONGODB_DB_NAME
+        sync: false
+      - key: MONGODB_COLLECTION_CHUNKS
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_GENERATION_MODEL
+        sync: false
+      - key: OPENROUTER_REWRITER_MODEL
+        sync: false
+      - key: OPENROUTER_EVAL_JUDGE_MODEL
+        sync: false
+      - key: FRONTEND_ORIGIN
+        value: "https://goosecompass-frontend.onrender.com"
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_EXPIRY_MINUTES
+        value: "10080"
+      - key: EMAIL_PROVIDER
+        value: "resend"
+      - key: EMAIL_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: OTP_TTL_MINUTES
+        value: "10"
+      - key: OTP_MAX_ATTEMPTS
+        value: "5"
+      - key: OTP_RESEND_COOLDOWN_SECONDS
+        value: "60"
+      - key: OTP_CODE_LENGTH
+        value: "6"
+      - key: MONTHLY_SPEND_CAP_USD
+        value: "2.0"
+      - key: USER_MONTHLY_QUOTA_TOKENS
+        value: "50000"
+      - key: REDIS_URI
+        value: "redis://localhost:6379"
+      - key: RATE_LIMIT_REQUESTS
+        value: "5"
+      - key: RATE_LIMIT_WINDOW_SECONDS
+        value: "60"
+      - key: LOGFIRE_API_KEY
+        sync: false
+      - key: LOGFIRE_ENABLED
+        value: "true"
+    healthCheckPath: /health
+    healthCheckInterval: 30
+    preDeployCommand: alembic upgrade head
+
+  - type: web
+    name: goosecompass-frontend
+    runtime: docker
+    dockerfilePath: ./frontend/Dockerfile
+    envVars:
+      - key: API_BACKEND_URL
+        value: "https://goosecompass-backend.onrender.com"
+    healthCheckPath: /
+    regions:
+      - oregon
+
+databases:
+  - name: postgres
+    databaseName: goosecompass
+    region: oregon
+    version: 16
+    plan: free
+    postgreSQL:
+      version: 16
