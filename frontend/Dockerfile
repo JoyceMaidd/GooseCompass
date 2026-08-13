@@ -10,7 +10,8 @@ RUN npm run build
 
 # Stage 2: Serve
 FROM nginx:alpine
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY nginx.conf /etc/nginx/nginx.conf.template
+RUN apk add --no-cache gettext
 COPY --from=builder /build/dist /usr/share/nginx/html
 EXPOSE 3000
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["sh", "-c", "envsubst < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"]
