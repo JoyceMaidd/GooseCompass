@@ -2,6 +2,7 @@
 
 from contextlib import asynccontextmanager
 
+import logfire
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -10,6 +11,10 @@ from backend.api.routes.query import router as query_router
 from backend.config import settings
 from backend.db import connect, connect_postgres, disconnect, disconnect_postgres
 from backend.monitoring.rate_limit import limiter
+
+# Initialize Logfire for observability
+if settings.logfire_enabled and settings.logfire_api_key:
+    logfire.configure(token=settings.logfire_api_key)
 
 
 @asynccontextmanager
@@ -31,6 +36,10 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="GooseCompass", lifespan=lifespan)
 app.state.limiter = limiter
+
+# Instrument FastAPI with Logfire if enabled
+if settings.logfire_enabled and settings.logfire_api_key:
+    logfire.instrument_fastapi(app)
 
 app.add_middleware(
     CORSMiddleware,

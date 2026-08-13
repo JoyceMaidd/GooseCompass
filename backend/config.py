@@ -33,6 +33,8 @@ class Settings(BaseSettings):
     redis_uri: str
     rate_limit_requests: int
     rate_limit_window_seconds: int
+    logfire_api_key: str
+    logfire_enabled: bool
 
 
 settings = Settings()

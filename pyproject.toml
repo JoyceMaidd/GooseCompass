@@ -27,6 +27,7 @@ dependencies = [
     "bcrypt>=4.2",
     "slowapi>=0.1.9",
     "redis>=5.0",
+    "pydantic-logfire>=0.2.0",
 ]
 
 [project.optional-dependencies]
