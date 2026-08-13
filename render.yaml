@@ -2,7 +2,6 @@ services:
   - type: web
     name: goosecompass-backend
     runtime: python
-    pythonVersion: 3.11
     buildCommand: pip install -e . && alembic upgrade head
     startCommand: uvicorn backend.api.app:app --host 0.0.0.0 --port $PORT
     envVars:
@@ -67,8 +66,6 @@ services:
       - key: LOGFIRE_ENABLED
         value: "true"
     healthCheckPath: /health
-    healthCheckInterval: 30
-    preDeployCommand: alembic upgrade head
 
   - type: web
     name: goosecompass-frontend
@@ -78,14 +75,9 @@ services:
       - key: API_BACKEND_URL
         value: "https://goosecompass-backend.onrender.com"
     healthCheckPath: /
-    regions:
-      - oregon
 
 databases:
   - name: postgres
     databaseName: goosecompass
     region: oregon
-    version: 16
     plan: free
-    postgreSQL:
-      version: 16
