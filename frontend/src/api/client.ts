@@ -1,7 +1,5 @@
 import type { Citation, GeneratedResponse } from '../types'
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
-
 /**
  * Send a query and receive the full structured response in one shot.
  *
@@ -9,7 +7,7 @@ const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
  * @returns The complete GeneratedResponse from the backend.
  */
 export async function queryNonStreaming(query: string): Promise<GeneratedResponse> {
-  const response = await fetch(`${API_URL}/query`, {
+  const response = await fetch('/api/query', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ query }),
@@ -37,7 +35,7 @@ export async function queryStreaming(
   onParagraphEnd: (citations: Citation[]) => void,
   onDone: () => void,
 ): Promise<void> {
-  const response = await fetch(`${API_URL}/query/stream`, {
+  const response = await fetch('/api/query/stream', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ query }),
