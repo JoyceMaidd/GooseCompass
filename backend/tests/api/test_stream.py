@@ -13,11 +13,9 @@ from sqlalchemy import delete, select
 import backend.db
 from backend.api.app import app
 from backend.api.routes.query import _stream_response
-from backend.auth.models import User
-from backend.auth.tokens import create_session_token
 from backend.db import connect, connect_postgres, disconnect, disconnect_postgres
 from backend.generation.models import Citation, CitedParagraph, GeneratedResponse
-from backend.monitoring.models import UsageLog
+from backend.monitoring.models import User, UsageLog
 
 
 @pytest.fixture(autouse=True)
@@ -51,9 +49,6 @@ async def db_connection():
         pass
 
 
-_AUTH_HEADERS = {"Authorization": f"Bearer {create_session_token('student@uwaterloo.ca')}"}
-
-
 def _parse_sse(raw: str) -> list[dict]:
     """Parse a raw SSE response body into a list of event payloads.
 
@@ -77,23 +72,10 @@ async def test_stream_returns_200():
         response = await client.post(
             "/query/stream",
             json={"query": "What GPA do I need to apply for exchange?"},
-            headers=_AUTH_HEADERS,
             timeout=120,
         )
     assert response.status_code == 200
     assert "text/event-stream" in response.headers["content-type"]
-
-
-@pytest.mark.asyncio
-async def test_stream_without_auth_header_returns_401():
-    """POST /query/stream without an Authorization header must return 401."""
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        response = await client.post(
-            "/query/stream",
-            json={"query": "What GPA do I need to apply for exchange?"},
-            timeout=120,
-        )
-    assert response.status_code == 401
 
 
 @pytest.mark.asyncio
@@ -103,7 +85,6 @@ async def test_stream_paragraph_end_events_follow_tokens():
         response = await client.post(
             "/query/stream",
             json={"query": "What GPA do I need to apply for exchange?"},
-            headers=_AUTH_HEADERS,
             timeout=120,
         )
     events = _parse_sse(response.text)
@@ -193,7 +174,6 @@ async def test_stream_reconstructed_text_nonempty():
         response = await client.post(
             "/query/stream",
             json={"query": "What GPA do I need to apply for exchange?"},
-            headers=_AUTH_HEADERS,
             timeout=120,
         )
     events = _parse_sse(response.text)

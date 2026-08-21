@@ -1,6 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { queryNonStreaming, queryStreaming } from './client'
-import { clearToken, setToken } from '../lib/authStorage'
 
 const MOCK_RESPONSE = {
   paragraphs: [{ text: 'You need a 70% GPA.', citations: [{ id: 'chunk-1', title: 'GPA Requirements', url: 'https://uwaterloo.ca/gpa' }] }],
@@ -28,10 +27,6 @@ beforeEach(() => {
   vi.restoreAllMocks()
 })
 
-afterEach(() => {
-  clearToken()
-})
-
 describe('queryNonStreaming', () => {
   it('calls /query and returns parsed JSON', async () => {
     const mockFetch = vi.fn().mockResolvedValue({
@@ -52,29 +47,6 @@ describe('queryNonStreaming', () => {
   it('throws on non-ok response', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 500 }))
     await expect(queryNonStreaming('test')).rejects.toThrow('HTTP 500')
-  })
-
-  it('attaches Authorization header when a token is stored', async () => {
-    setToken('fake-jwt')
-    const mockFetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(MOCK_RESPONSE) })
-    vi.stubGlobal('fetch', mockFetch)
-
-    await queryNonStreaming('What GPA do I need?')
-
-    expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining('/query'),
-      expect.objectContaining({ headers: expect.objectContaining({ Authorization: 'Bearer fake-jwt' }) }),
-    )
-  })
-
-  it('omits Authorization header when no token is stored', async () => {
-    const mockFetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(MOCK_RESPONSE) })
-    vi.stubGlobal('fetch', mockFetch)
-
-    await queryNonStreaming('What GPA do I need?')
-
-    const [, options] = mockFetch.mock.calls[0]
-    expect(options.headers).not.toHaveProperty('Authorization')
   })
 })
 

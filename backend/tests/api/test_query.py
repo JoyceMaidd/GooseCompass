@@ -10,10 +10,8 @@ from sqlalchemy import delete, select
 
 import backend.db
 from backend.api.app import app
-from backend.auth.models import User
-from backend.auth.tokens import create_session_token
 from backend.db import connect, connect_postgres, disconnect, disconnect_postgres
-from backend.monitoring.models import UsageLog
+from backend.monitoring.models import User, UsageLog
 
 
 @pytest.fixture(autouse=True)
@@ -47,9 +45,6 @@ async def db_connection():
         pass
 
 
-_AUTH_HEADERS = {"Authorization": f"Bearer {create_session_token('student@uwaterloo.ca')}"}
-
-
 @pytest.mark.asyncio
 async def test_query_returns_200():
     """POST /query with a valid question must return 200 OK."""
@@ -57,22 +52,9 @@ async def test_query_returns_200():
         response = await client.post(
             "/query",
             json={"query": "What GPA do I need to apply for exchange?"},
-            headers=_AUTH_HEADERS,
             timeout=120,
         )
     assert response.status_code == 200
-
-
-@pytest.mark.asyncio
-async def test_query_without_auth_header_returns_401():
-    """POST /query without an Authorization header must return 401."""
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        response = await client.post(
-            "/query",
-            json={"query": "What GPA do I need to apply for exchange?"},
-            timeout=120,
-        )
-    assert response.status_code == 401
 
 
 @pytest.mark.asyncio
@@ -82,7 +64,6 @@ async def test_query_response_has_paragraphs():
         response = await client.post(
             "/query",
             json={"query": "What GPA do I need to apply for exchange?"},
-            headers=_AUTH_HEADERS,
             timeout=120,
         )
     body = response.json()

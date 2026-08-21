@@ -6,11 +6,9 @@ import logfire
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.api.routes.auth import router as auth_router
 from backend.api.routes.query import router as query_router
 from backend.config import settings
 from backend.db import connect, connect_postgres, disconnect, disconnect_postgres
-from backend.monitoring.rate_limit import limiter
 
 # Initialize Logfire for observability
 if settings.logfire_enabled and settings.logfire_api_key:
@@ -35,7 +33,6 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="GooseCompass", lifespan=lifespan)
-app.state.limiter = limiter
 
 # Instrument FastAPI with Logfire if enabled
 if settings.logfire_enabled and settings.logfire_api_key:
@@ -50,7 +47,6 @@ app.add_middleware(
 )
 
 app.include_router(query_router)
-app.include_router(auth_router)
 
 
 @app.get("/health")
