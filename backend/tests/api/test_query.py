@@ -6,31 +6,27 @@ OpenAI embeddings API, and OpenRouter generation API.
 
 import pytest
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy import delete, select
+from sqlalchemy import delete
 
 import backend.db
 from backend.api.app import app
 from backend.db import connect, connect_postgres, disconnect, disconnect_postgres
-from backend.monitoring.models import UsageLog, User
+from backend.monitoring.models import UsageLog
+from backend.monitoring.quota import DEMO_USER_ID
 
 
 @pytest.fixture(autouse=True)
 async def db_connection():
+    """Set up database connection and reset quota usage for each test."""
     await connect()
     await connect_postgres()
 
     sessionmaker = backend.db._pg_sessionmaker
     if sessionmaker is not None:
         async with sessionmaker() as session:
-            existing = await session.execute(select(User).where(User.email == "student@uwaterloo.ca"))
-            user = existing.scalar_one_or_none()
-            if user is None:
-                user = User(email="student@uwaterloo.ca")
-                session.add(user)
-                await session.commit()
-                await session.refresh(user)
-
-            await session.execute(delete(UsageLog).where(UsageLog.user_id == user.id))
+            # check_user_quota enforces against DEMO_USER_ID regardless of
+            # caller identity, so tests must clear usage logged against it.
+            await session.execute(delete(UsageLog).where(UsageLog.user_id == DEMO_USER_ID))
             await session.commit()
 
     yield

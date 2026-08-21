@@ -3,6 +3,7 @@
 Runs Alembic migrations before tests to ensure database tables exist.
 """
 
+import asyncio
 import subprocess
 import sys
 from pathlib import Path
@@ -35,3 +36,18 @@ def setup_test_database():
         print(f"Warning: Could not run Alembic migrations: {e}")
 
     yield
+
+
+@pytest.fixture(scope="session")
+def event_loop():
+    """Create a session-scoped event loop for async tests.
+
+    Args:
+        None
+
+    Returns:
+        asyncio.AbstractEventLoop: The event loop for the session.
+    """
+    loop = asyncio.new_event_loop()
+    yield loop
+    loop.close()
