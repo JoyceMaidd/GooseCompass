@@ -28,6 +28,7 @@ dependencies = [
     "slowapi>=0.1.9",
     "redis>=5.0",
     "logfire>=0.2.0",
+    "opentelemetry-instrumentation-fastapi>=0.48b0",
 ]
 
 [project.optional-dependencies]
