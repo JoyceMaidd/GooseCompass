@@ -1,23 +1,16 @@
 import { useEffect, useRef } from 'react'
 import { ChatInput } from '../components/ChatInput'
 import { ChatMessage } from '../components/ChatMessage'
-import { ProfileMenu } from '../components/ProfileMenu'
 import { SuggestedQuestions } from '../components/SuggestedQuestions'
 import { useChat } from '../hooks/useChat'
-
-interface ChatPageProps {
-  email: string
-  onSignOut: () => void
-}
 
 /**
  * Main chat page — composes the chat hook, message list, and input field.
  *
  * Automatically scrolls to the bottom whenever the message list grows or the
- * last assistant message receives new tokens. Also renders the profile menu
- * with sign-out functionality in the header.
+ * last assistant message receives new tokens.
  */
-export function ChatPage({ email, onSignOut }: ChatPageProps) {
+export function ChatPage() {
   const { messages, isLoading, sendMessage, startNewChat } = useChat()
   const bottomRef = useRef<HTMLDivElement>(null)
 
@@ -39,7 +32,6 @@ export function ChatPage({ email, onSignOut }: ChatPageProps) {
           <button className="chat-page__new-chat" onClick={startNewChat}>
             New Chat +
           </button>
-          <ProfileMenu email={email} onSignOut={onSignOut} />
         </div>
       </header>
 

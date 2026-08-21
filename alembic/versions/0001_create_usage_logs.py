@@ -1,8 +1,8 @@
-"""create users and auth_codes
+"""Create users and usage_logs tables with seeded demo user
 
 Revision ID: 0001
 Revises:
-Create Date: 2026-07-29
+Create Date: 2026-08-20
 
 """
 
@@ -27,21 +27,30 @@ def upgrade() -> None:
     )
     op.create_index("ix_users_email", "users", ["email"], unique=True)
 
-    op.create_table(
-        "auth_codes",
-        sa.Column("id", sa.Integer(), primary_key=True),
-        sa.Column("email", sa.String(), nullable=False),
-        sa.Column("code_hash", sa.String(), nullable=False),
-        sa.Column("expires_at", sa.DateTime(timezone=True), nullable=False),
-        sa.Column("attempts", sa.Integer(), server_default="0", nullable=False),
-        sa.Column("consumed", sa.Boolean(), server_default=sa.false(), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+    op.bulk_insert(
+        sa.table("users", sa.column("id"), sa.column("email")),
+        [{"id": 1, "email": "demo@uwaterloo.ca"}],
     )
-    op.create_index("ix_auth_codes_email", "auth_codes", ["email"])
+
+    op.create_table(
+        "usage_logs",
+        sa.Column("id", sa.Integer(), primary_key=True),
+        sa.Column("user_id", sa.Integer(), nullable=False),
+        sa.Column("tokens_used", sa.Integer(), nullable=False),
+        sa.Column("cost_usd", sa.Float(), nullable=False),
+        sa.Column("status_code", sa.Integer(), nullable=False),
+        sa.Column("latency_ms", sa.Integer(), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["user_id"],
+            ["users.id"],
+        ),
+    )
+    op.create_index("ix_usage_logs_user_id_created_at", "usage_logs", ["user_id", "created_at"])
 
 
 def downgrade() -> None:
-    op.drop_index("ix_auth_codes_email", table_name="auth_codes")
-    op.drop_table("auth_codes")
+    op.drop_index("ix_usage_logs_user_id_created_at", table_name="usage_logs")
+    op.drop_table("usage_logs")
     op.drop_index("ix_users_email", table_name="users")
     op.drop_table("users")

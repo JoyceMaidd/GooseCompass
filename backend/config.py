@@ -19,20 +19,8 @@ class Settings(BaseSettings):
     openrouter_eval_judge_model: str
     frontend_origin: str
     postgres_uri: str
-    jwt_secret: str
-    jwt_expiry_minutes: int
-    email_provider: str
-    email_api_key: str
-    email_from: str
-    otp_ttl_minutes: int
-    otp_max_attempts: int
-    otp_resend_cooldown_seconds: int
-    otp_code_length: int
     monthly_spend_cap_usd: float
     user_monthly_quota_tokens: int
-    redis_uri: str
-    rate_limit_requests: int
-    rate_limit_window_seconds: int
     logfire_api_key: str = ""
     logfire_enabled: bool = True
 

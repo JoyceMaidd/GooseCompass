@@ -24,7 +24,7 @@ beforeEach(() => {
 describe('ChatPage', () => {
   it('renders the header and input', () => {
     mockUseChat.mockReturnValue({ messages: [], isLoading: false, sendMessage: vi.fn(), startNewChat: vi.fn() })
-    render(<ChatPage email="" onSignOut={vi.fn()} />)
+    render(<ChatPage/>)
     expect(screen.getByRole('heading', { name: /GooseCompass/i })).toBeInTheDocument()
     expect(screen.getByRole('textbox')).toBeInTheDocument()
   })
@@ -32,7 +32,7 @@ describe('ChatPage', () => {
   it('calls sendMessage when user submits a query', async () => {
     const sendMessage = vi.fn()
     mockUseChat.mockReturnValue({ messages: [], isLoading: false, sendMessage, startNewChat: vi.fn() })
-    render(<ChatPage email="" onSignOut={vi.fn()} />)
+    render(<ChatPage />)
 
     await userEvent.type(screen.getByRole('textbox'), 'What GPA do I need?{Enter}')
 
@@ -57,7 +57,7 @@ describe('ChatPage', () => {
       sendMessage: vi.fn(),
       startNewChat: vi.fn(),
     })
-    render(<ChatPage email="" onSignOut={vi.fn()} />)
+    render(<ChatPage />)
 
     expect(screen.getByText('What GPA?')).toBeInTheDocument()
     expect(screen.getByText('You need 70%.')).toBeInTheDocument()
@@ -65,31 +65,17 @@ describe('ChatPage', () => {
 
   it('disables input while isLoading is true', () => {
     mockUseChat.mockReturnValue({ messages: [], isLoading: true, sendMessage: vi.fn(), startNewChat: vi.fn() })
-    render(<ChatPage email="" onSignOut={vi.fn()} />)
+    render(<ChatPage />)
     expect(screen.getByRole('textbox')).toBeDisabled()
   })
 
   it('calls startNewChat when the New Chat button is clicked', async () => {
     const startNewChat = vi.fn()
     mockUseChat.mockReturnValue({ messages: [], isLoading: false, sendMessage: vi.fn(), startNewChat })
-    render(<ChatPage email="" onSignOut={vi.fn()} />)
+    render(<ChatPage />)
 
     await userEvent.click(screen.getByRole('button', { name: /New Chat/i }))
 
     expect(startNewChat).toHaveBeenCalledOnce()
-  })
-
-  it('opens the profile menu and calls onSignOut when Log out is clicked', async () => {
-    const onSignOut = vi.fn()
-    mockUseChat.mockReturnValue({ messages: [], isLoading: false, sendMessage: vi.fn(), startNewChat: vi.fn() })
-    render(<ChatPage email="test@uwaterloo.ca" onSignOut={onSignOut} />)
-
-    const avatarButton = screen.getByRole('button', { name: /Account menu/i })
-    await userEvent.click(avatarButton)
-
-    const logoutButton = screen.getByRole('menuitem', { name: /Log out/i })
-    await userEvent.click(logoutButton)
-
-    expect(onSignOut).toHaveBeenCalledOnce()
   })
 })

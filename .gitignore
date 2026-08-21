@@ -32,5 +32,4 @@ documents/
 sources.json
 
 # Claude
-.claude/tasks
-.claude/specs
+.claude/

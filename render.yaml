@@ -4,6 +4,7 @@ services:
     runtime: python
     buildCommand: pip install -e . && alembic upgrade head
     startCommand: uvicorn backend.api.app:app --host 0.0.0.0 --port $PORT
+    autoDeploy: false
     envVars:
       - key: PYTHONUNBUFFERED
         value: 1
@@ -71,6 +72,7 @@ services:
     name: goosecompass-frontend
     runtime: docker
     dockerfilePath: ./frontend/Dockerfile
+    autoDeploy: false
     envVars:
       - key: API_BACKEND_URL
         value: "https://goosecompass-backend.onrender.com"
