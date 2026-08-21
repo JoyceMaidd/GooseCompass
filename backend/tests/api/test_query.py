@@ -11,7 +11,7 @@ from sqlalchemy import delete, select
 import backend.db
 from backend.api.app import app
 from backend.db import connect, connect_postgres, disconnect, disconnect_postgres
-from backend.monitoring.models import User, UsageLog
+from backend.monitoring.models import UsageLog, User
 
 
 @pytest.fixture(autouse=True)

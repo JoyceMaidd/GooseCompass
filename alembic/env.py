@@ -1,8 +1,8 @@
 from logging.config import fileConfig
 
+import backend.auth.models  # noqa: F401 — registers auth tables on Base.metadata
 from sqlalchemy import engine_from_config, pool
 
-import backend.auth.models  # noqa: F401 — registers auth tables on Base.metadata
 import backend.monitoring.models  # noqa: F401 — registers monitoring tables on Base.metadata
 from alembic import context
 from backend.config import settings

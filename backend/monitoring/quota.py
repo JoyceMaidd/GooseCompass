@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.config import settings
 from backend.db import get_session
-from backend.monitoring.models import User, UsageLog
+from backend.monitoring.models import UsageLog
 from backend.monitoring.period import start_of_current_month
 
 DEMO_USER_ID = 1

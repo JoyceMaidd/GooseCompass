@@ -15,7 +15,7 @@ from backend.api.app import app
 from backend.api.routes.query import _stream_response
 from backend.db import connect, connect_postgres, disconnect, disconnect_postgres
 from backend.generation.models import Citation, CitedParagraph, GeneratedResponse
-from backend.monitoring.models import User, UsageLog
+from backend.monitoring.models import UsageLog, User
 
 
 @pytest.fixture(autouse=True)
