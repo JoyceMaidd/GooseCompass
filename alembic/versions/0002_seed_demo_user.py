@@ -19,12 +19,7 @@ depends_on: Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    op.execute(
-        sa.text(
-            "INSERT INTO users (id, email) VALUES (1, 'demo@uwaterloo.ca') "
-            "ON CONFLICT (id) DO NOTHING"
-        )
-    )
+    op.execute(sa.text("INSERT INTO users (id, email) VALUES (1, 'demo@uwaterloo.ca') ON CONFLICT (id) DO NOTHING"))
 
 
 def downgrade() -> None:
