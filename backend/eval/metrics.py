@@ -25,7 +25,7 @@ from deepeval.metrics import (
 
 from backend.eval.judge_model import OpenRouterJudgeModel
 
-_METRIC_THRESHOLD = 0.2
+_METRIC_THRESHOLD = 0.5
 
 
 def build_hard_metrics(judge: OpenRouterJudgeModel) -> list[BaseMetric]:
