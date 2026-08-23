@@ -33,7 +33,7 @@ services:
       - key: OPENROUTER_EVAL_JUDGE_MODEL
         sync: false
       - key: FRONTEND_ORIGIN
-        value: "https://goosecompass-frontend.onrender.com"
+        value: "https://goosecompass.onrender.com"
       - key: JWT_SECRET
         sync: false
       - key: JWT_EXPIRY_MINUTES
@@ -69,7 +69,7 @@ services:
     healthCheckPath: /health
 
   - type: web
-    name: goosecompass-frontend
+    name: goosecompass
     runtime: docker
     dockerfilePath: ./frontend/Dockerfile
     autoDeploy: false
