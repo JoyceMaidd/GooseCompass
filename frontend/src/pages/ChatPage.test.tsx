@@ -78,4 +78,41 @@ describe('ChatPage', () => {
 
     expect(startNewChat).toHaveBeenCalledOnce()
   })
+
+  it('shows the typing indicator while awaiting the first token', () => {
+    mockUseChat.mockReturnValue({
+      messages: makeMessages([
+        { role: 'user', paragraphs: [{ text: 'What GPA?', citations: [] }] },
+        { role: 'assistant', paragraphs: [{ text: '', citations: [] }] },
+      ]),
+      isLoading: true,
+      sendMessage: vi.fn(),
+      startNewChat: vi.fn(),
+    })
+    render(<ChatPage />)
+
+    expect(screen.getByRole('status', { name: /typing/i })).toBeInTheDocument()
+  })
+
+  it('hides the typing indicator once the assistant reply has text', () => {
+    mockUseChat.mockReturnValue({
+      messages: makeMessages([
+        { role: 'user', paragraphs: [{ text: 'What GPA?', citations: [] }] },
+        { role: 'assistant', paragraphs: [{ text: 'You need 70%.', citations: [] }] },
+      ]),
+      isLoading: true,
+      sendMessage: vi.fn(),
+      startNewChat: vi.fn(),
+    })
+    render(<ChatPage />)
+
+    expect(screen.queryByRole('status', { name: /typing/i })).toBeNull()
+  })
+
+  it('does not show the typing indicator when not loading', () => {
+    mockUseChat.mockReturnValue({ messages: [], isLoading: false, sendMessage: vi.fn(), startNewChat: vi.fn() })
+    render(<ChatPage />)
+
+    expect(screen.queryByRole('status', { name: /typing/i })).toBeNull()
+  })
 })

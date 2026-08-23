@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { ChatInput } from '../components/ChatInput'
 import { ChatMessage } from '../components/ChatMessage'
 import { SuggestedQuestions } from '../components/SuggestedQuestions'
+import { TypingIndicator } from '../components/TypingIndicator'
 import { useChat } from '../hooks/useChat'
 
 /**
@@ -13,6 +14,13 @@ import { useChat } from '../hooks/useChat'
 export function ChatPage() {
   const { messages, isLoading, sendMessage, startNewChat } = useChat()
   const bottomRef = useRef<HTMLDivElement>(null)
+
+  const lastMessage = messages[messages.length - 1]
+  const isAwaitingFirstToken =
+    isLoading &&
+    lastMessage?.role === 'assistant' &&
+    lastMessage.paragraphs.every(p => p.text === '')
+  const visibleMessages = isAwaitingFirstToken ? messages.slice(0, -1) : messages
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -46,9 +54,10 @@ export function ChatPage() {
           </div>
         ) : (
           <div className="chat-page__thread">
-            {messages.map((message, idx) => (
+            {visibleMessages.map((message, idx) => (
               <ChatMessage key={idx} paragraphs={message.paragraphs} role={message.role} />
             ))}
+            {isAwaitingFirstToken && <TypingIndicator />}
             <div ref={bottomRef} />
           </div>
         )}
