@@ -3,19 +3,19 @@
     "id": "matching-process",
     "category": "matching",
     "query": "How does the study abroad team determine who gets matched with a partner school?",
-    "expected_output": "We allocate exchange spots at each school to students in Waterloo's six faculties based on: Number of applications that are received from each faculty, your GPA and program type, and your faculty endorsement. Students who apply only to ultra competitive (red schools) or very competitive (yellow schools) risk not getting matched, even with a high GPA."
+    "expected_output": "The study abroad team allocates exchange spots at each school based on several factors. These include the number of applications received from each faculty, the student's GPA and program type, and the faculty's endorsement of the student. Spots are also divided among faculties according to student interest. Since spots are limited and some schools are very competitive, these criteria help ensure a fair distribution among applicants."
   },
   {
     "id": "eligibility-gpa-general",
     "category": "eligibility",
     "query": "What GPA do I need to be eligible to go on an exchange?",
-    "expected_output": "There isn't one single university-wide minimum GPA. You should pay close attention to the minimum overall average and language requirements listed for each host school on Waterloo Passport, since these vary by school. Your own faculty also sets its own eligibility requirements, so check your faculty's exchange page as well."
+    "expected_output": "The GPA requirement to be eligible for an exchange varies depending on the faculty and the specific program. For example, students in arts generally need a minimum overall average of 70% at the time of application, while engineering students typically need a cumulative average of 80%. Students interested in the mathematics exchange program must have a minimum cumulative average of 75%."
   },
   {
     "id": "match-guarantee",
     "category": "application",
     "query": "If I'm matched with a host school, is that a guarantee I'll be accepted?",
-    "expected_output": "No -- being matched means the university has held a spot for you at that school, but it doesn't guarantee acceptance to the host school. Matches are released in a single round, and while the university does its best to accommodate as many student preferences as possible, it cannot guarantee students receive their first-choice placement."
+    "expected_output": "No -- Being matched with a host school does not guarantee acceptance into the program. It means that the university has held a spot for you at that school and you will need to submit a formal application for admission to the host school. The match is a preliminary step before official acceptance."
   },
   {
     "id": "after-match-steps",
@@ -27,19 +27,19 @@
     "id": "course-flexibility",
     "category": "application",
     "query": "Can I be sure the courses I want to take abroad will be available?",
-    "expected_output": "No -- the university cannot guarantee course availability at the host institution, so it's important to be flexible when selecting courses for any exchange program."
+    "expected_output": "No -- Course availability at your host school is never guaranteed, so it is important to research carefully and have alternative options. You should review the course offerings, schedules, and language of instruction at your chosen institution, and consider selecting some electives or backup courses in case your first choices are not available."
   },
   {
     "id": "tuition-during-exchange",
     "category": "finance",
     "query": "How does tuition work while I'm on exchange?",
-    "expected_output": "On an exchange program, you remain enrolled at Waterloo and continue paying tuition to Waterloo rather than the host school. You'll be charged for 2.5 units whether you take three, four, or five courses abroad, and tuition must be paid by the standard term deadline to avoid late fees. This differs from Study Abroad programs, where tuition is assessed directly by the host institution."
+    "expected_output": "During an exchange program at the University of Waterloo, you pay your normal tuition fees (for 2.5 units) to Waterloo. There is no extra tuition charged solely because you participate in the exchange program. Your tuition for a term abroad remains the same regardless of whether you take a lighter course load at the host school. This differs from Study Abroad programs, where tuition is assessed directly by the host institution."
   },
   {
     "id": "financial-aid-osap",
     "category": "finance",
     "query": "Can I still receive OSAP while on exchange?",
-    "expected_output": "Yes -- exchange participants who remain registered as full-time Waterloo students are still eligible for OSAP. Questions should be directed to the Student Awards & Financial Aid Office."
+    "expected_output": "Yes, students participating in an exchange are registered as full-time students at Waterloo, which allows them to continue receiving OSAP while abroad. "
   },
   {
     "id": "exchange-scholarships",
