@@ -1,6 +1,6 @@
 # GooseCompass
 
-A RAG-based AI assistant that answers exchange-program questions for University of Waterloo outbound students — partner universities, application procedures, eligibility, housing, visas, and more — with every answer cited to official source documents.
+A RAG-based AI assistant that answers exchange-program questions for University of Waterloo outbound students —- partner universities, application procedures, eligibility, housing, visas, and more! With every answer cited to official source documents.
 
 ## Overview
 
@@ -10,7 +10,13 @@ Students researching exchange programs have to dig through scattered PDFs and we
 
 ## Demo
 
-https://github.com/user-attachments/assets/0abeff0b-f22f-457f-8b15-180e1a462644
+
+
+https://github.com/user-attachments/assets/1731a4cc-86a3-483c-b51a-7ea03be4a746
+
+
+
+
 
 ## Features
 
