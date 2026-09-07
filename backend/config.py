@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     openrouter_generation_model: str
     openrouter_rewriter_model: str
     openrouter_eval_judge_model: str
+    openrouter_planner_model: str
     frontend_origin: str
     postgres_uri: str
     monthly_spend_cap_usd: float

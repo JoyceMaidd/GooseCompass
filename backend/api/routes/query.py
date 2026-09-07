@@ -7,7 +7,6 @@ from collections.abc import AsyncIterator
 
 from fastapi import APIRouter, BackgroundTasks, Depends
 from fastapi.responses import StreamingResponse
-from openai import AsyncOpenAI
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -19,6 +18,7 @@ from backend.generation.rewriter import rewrite_query
 from backend.monitoring.logging import log_usage_to_db
 from backend.monitoring.quota import check_user_quota
 from backend.monitoring.spend_cap import check_spend_cap
+from backend.retrieval.embeddings import embed_query
 from backend.retrieval.pipeline import retrieve
 
 router = APIRouter()
@@ -36,23 +36,6 @@ class QueryRequest(BaseModel):
 
     query: str
     session_history: list = []
-
-
-async def _embed(text: str) -> list[float]:
-    """Embed text using OpenAI text-embedding-3-small.
-
-    Args:
-        text: The string to embed.
-
-    Returns:
-        A 1536-dimensional embedding vector.
-    """
-    client = AsyncOpenAI(api_key=settings.openai_api_key)
-    response = await client.embeddings.create(
-        input=text,
-        model="text-embedding-3-small",
-    )
-    return response.data[0].embedding
 
 
 @router.post("/query", response_model=GeneratedResponse, response_model_exclude_none=True)
@@ -80,7 +63,7 @@ async def query(
     """
     start_time = time.time()
     rewritten = await rewrite_query(request.query)
-    embedding = await _embed(rewritten)
+    embedding = await embed_query(rewritten)
 
     db = get_database()
     collection = db[settings.mongodb_collection_chunks]
@@ -203,7 +186,7 @@ async def query_stream(
     """
     start_time = time.time()
     rewritten = await rewrite_query(request.query)
-    embedding = await _embed(rewritten)
+    embedding = await embed_query(rewritten)
 
     db = get_database()
     collection = db[settings.mongodb_collection_chunks]

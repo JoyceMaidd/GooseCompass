@@ -6,6 +6,7 @@ import logfire
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from backend.api.routes.planner import router as planner_router
 from backend.api.routes.query import router as query_router
 from backend.config import settings
 from backend.db import connect, connect_postgres, disconnect, disconnect_postgres
@@ -47,6 +48,7 @@ app.add_middleware(
 )
 
 app.include_router(query_router)
+app.include_router(planner_router)
 
 
 @app.get("/health")
