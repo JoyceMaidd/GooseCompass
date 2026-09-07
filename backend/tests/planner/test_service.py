@@ -105,3 +105,20 @@ async def test_course_match_crud_round_trip():
         matches_after = await service.list_course_matches(session, plan.id, host_school_id=school.id)
         assert all(m.id != created.id for m in matches_after)
         break
+
+
+@pytest.mark.integration
+async def test_get_plan_snapshot_reflects_recorded_state():
+    """get_plan_snapshot must reflect the plan's current phase, host schools, and course matches."""
+    async for session in get_session():
+        plan = await service.get_or_create_plan(session, DEMO_USER_ID)
+        school = await service.create_host_school(session, plan.id, HostSchoolCreate(school_name="ETH Zurich"))
+        await service.create_course_match(
+            session, plan.id, CourseMatchCreate(host_school_id=school.id, host_course_code="252-0061-00L")
+        )
+
+        snapshot = await service.get_plan_snapshot(session, plan.id)
+        assert snapshot.current_phase == plan.current_phase
+        assert any(s["school_name"] == "ETH Zurich" for s in snapshot.host_schools)
+        assert any(m["host_course_code"] == "252-0061-00L" for m in snapshot.course_matches)
+        break

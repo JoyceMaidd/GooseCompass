@@ -3,6 +3,7 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.planner.agents.models import PlanSnapshot
 from backend.planner.models import CourseMatch, ExchangePlan, HostSchool
 from backend.planner.schemas import (
     CourseMatchCreate,
@@ -214,3 +215,37 @@ async def delete_course_match(session: AsyncSession, match: CourseMatch) -> None
     """
     await session.delete(match)
     await session.commit()
+
+
+async def get_plan_snapshot(session: AsyncSession, exchange_plan_id: int) -> PlanSnapshot:
+    """Build a read-only snapshot of a plan's phase, host schools, and course matches.
+
+    Used by the phase-tracking agent to ground its recommendation in the
+    student's actual recorded progress rather than assumptions.
+
+    Args:
+        session: Postgres async session.
+        exchange_plan_id: The plan to snapshot.
+
+    Returns:
+        A PlanSnapshot reflecting the plan's current recorded state.
+    """
+    plan = await session.get(ExchangePlan, exchange_plan_id)
+    host_schools = await list_host_schools(session, exchange_plan_id)
+    course_matches = await list_course_matches(session, exchange_plan_id)
+    return PlanSnapshot(
+        current_phase=plan.current_phase,
+        host_schools=[
+            {"school_name": s.school_name, "country": s.country, "status": s.status.value, "notes": s.notes}
+            for s in host_schools
+        ],
+        course_matches=[
+            {
+                "host_course_code": m.host_course_code,
+                "uwaterloo_course_code": m.uwaterloo_course_code,
+                "status": m.status.value,
+                "notes": m.notes,
+            }
+            for m in course_matches
+        ],
+    )

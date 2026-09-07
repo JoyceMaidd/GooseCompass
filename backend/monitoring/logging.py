@@ -15,12 +15,15 @@ async def log_usage_to_db(
     output_tokens: int,
     status_code: int,
     latency_ms: int,
+    input_cost_per_1m_usd: float = _GENERATION_INPUT_COST_PER_1M_USD,
+    output_cost_per_1m_usd: float = _GENERATION_OUTPUT_COST_PER_1M_USD,
 ) -> None:
     """Log LLM usage to the database.
 
     Meant to be called via FastAPI BackgroundTasks, so runs asynchronously
     after the response is sent to the client. Computes cost from token counts
-    using static pricing for the configured generation model.
+    using the given per-million-token pricing, defaulting to the generation
+    model's rate so existing callers are unaffected.
 
     Args:
         session: Postgres async session.
@@ -29,11 +32,13 @@ async def log_usage_to_db(
         output_tokens: Completion tokens used.
         status_code: HTTP response status code.
         latency_ms: Request latency in milliseconds.
+        input_cost_per_1m_usd: Input token price in USD per million tokens.
+        output_cost_per_1m_usd: Output token price in USD per million tokens.
     """
     total_tokens = input_tokens + output_tokens
-    cost_usd = (input_tokens / 1_000_000) * _GENERATION_INPUT_COST_PER_1M_USD + (
+    cost_usd = (input_tokens / 1_000_000) * input_cost_per_1m_usd + (
         output_tokens / 1_000_000
-    ) * _GENERATION_OUTPUT_COST_PER_1M_USD
+    ) * output_cost_per_1m_usd
 
     log_entry = UsageLog(
         user_id=user_id,
