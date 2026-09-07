@@ -1,10 +1,20 @@
-"""CRUD routes for the exchange planner: plan, host schools, course matches."""
+"""Routes for the exchange planner: CRUD for plan/host schools/course matches, plus the AI assistant."""
 
-from fastapi import APIRouter, Depends, HTTPException
+import time
+
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.db import get_session
+from backend.config import settings
+from backend.db import get_database, get_session
+from backend.monitoring.logging import log_usage_to_db
+from backend.monitoring.quota import check_user_quota
+from backend.monitoring.spend_cap import check_spend_cap
 from backend.planner import service
+from backend.planner.agents.coordinator import run_planner_assistant
+from backend.planner.agents.deps import PlannerDeps
+from backend.planner.agents.models import PlannerAssistantReply
 from backend.planner.deps import get_current_user_id
 from backend.planner.schemas import (
     CourseMatchCreate,
@@ -18,6 +28,20 @@ from backend.planner.schemas import (
 )
 
 router = APIRouter(prefix="/planner")
+
+# Matches openrouter_planner_model's rate (currently openai/gpt-4.1-nano, same as generation).
+_PLANNER_INPUT_COST_PER_1M_USD = 0.10
+_PLANNER_OUTPUT_COST_PER_1M_USD = 0.40
+
+
+class PlannerAssistantRequest(BaseModel):
+    """Incoming planner assistant message.
+
+    Args:
+        message: The student's natural-language question or request.
+    """
+
+    message: str
 
 
 @router.get("/plan", response_model=ExchangePlanRead)
@@ -156,3 +180,52 @@ async def delete_course_match(
     if match is None:
         raise HTTPException(status_code=404, detail="Course match not found.")
     await service.delete_course_match(session, match)
+
+
+@router.post("/assistant", response_model=PlannerAssistantReply)
+async def planner_assistant(
+    request: PlannerAssistantRequest,
+    background_tasks: BackgroundTasks,
+    session: AsyncSession = Depends(get_session),
+    user_id: int = Depends(check_user_quota),
+    _: None = Depends(check_spend_cap),
+) -> PlannerAssistantReply:
+    """Run the planner coordinator agent for a student message.
+
+    Delegates to the host-school research and/or phase-tracking specialists
+    as needed. Checks quota before generation and spend-cap before the LLM
+    call, matching /query. Logs usage asynchronously at the planner model's
+    cost rate.
+
+    Args:
+        request: The assistant message payload.
+        background_tasks: FastAPI background task runner.
+        session: Postgres async session (for quota/spend-cap/logging).
+        user_id: User ID (from quota check; returned if under limit).
+        _: Spend-cap check (raises if exceeded).
+
+    Returns:
+        The coordinator's synthesized reply.
+    """
+    start_time = time.time()
+    plan = await service.get_or_create_plan(session, user_id)
+    db = get_database()
+    collection = db[settings.mongodb_collection_chunks]
+    deps = PlannerDeps(session=session, user_id=user_id, exchange_plan_id=plan.id, chunks_collection=collection)
+
+    reply, input_tokens, output_tokens = await run_planner_assistant(request.message, deps)
+
+    latency_ms = int((time.time() - start_time) * 1000)
+    background_tasks.add_task(
+        log_usage_to_db,
+        session,
+        user_id,
+        input_tokens,
+        output_tokens,
+        200,
+        latency_ms,
+        _PLANNER_INPUT_COST_PER_1M_USD,
+        _PLANNER_OUTPUT_COST_PER_1M_USD,
+    )
+
+    return reply
