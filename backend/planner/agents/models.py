@@ -33,34 +33,6 @@ class HostSchoolResearchResult(BaseModel):
     insufficient_context: bool = Field(default=False)
 
 
-class CourseMatchCandidate(BaseModel):
-    """A single suggested course equivalency, found via retrieval.
-
-    Args:
-        host_course_code: Host institution's course code.
-        host_course_title: Host institution's course title, if known.
-        suggested_uwaterloo_equivalent: A plausible UWaterloo equivalent course, if any.
-        rationale: Grounded explanation for the suggested equivalency.
-    """
-
-    host_course_code: str
-    host_course_title: str | None = None
-    suggested_uwaterloo_equivalent: str | None = None
-    rationale: str
-
-
-class CourseMatchSuggestion(BaseModel):
-    """Grounded suggestions from the course-matching specialist.
-
-    Args:
-        candidates: Suggested course equivalencies, grounded in retrieved content.
-        insufficient_context: True when retrieval returned nothing relevant.
-    """
-
-    candidates: list[CourseMatchCandidate]
-    insufficient_context: bool = Field(default=False)
-
-
 class PhaseTrackingUpdate(BaseModel):
     """Recommendation from the phase-tracking specialist.
 
@@ -95,11 +67,9 @@ class PlannerAssistantReply(BaseModel):
     Args:
         message: The coordinator's synthesized reply to the student.
         host_school_findings: Findings surfaced by the host-school specialist, if delegated to.
-        course_match_findings: Suggestions surfaced by the course-matching specialist, if delegated to.
         phase_update: Recommendation surfaced by the phase-tracking specialist, if delegated to.
     """
 
     message: str
     host_school_findings: list[HostSchoolFinding] = Field(default_factory=list)
-    course_match_findings: list[CourseMatchCandidate] = Field(default_factory=list)
     phase_update: PhaseTrackingUpdate | None = None
