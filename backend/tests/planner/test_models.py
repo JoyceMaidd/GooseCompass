@@ -64,9 +64,7 @@ async def test_deleting_plan_cascades_to_host_schools_and_course_matches():
             (await session.execute(select(HostSchool).where(HostSchool.exchange_plan_id == plan.id))).scalars().all()
         )
         remaining_matches = (
-            (await session.execute(select(CourseMatch).where(CourseMatch.exchange_plan_id == plan.id)))
-            .scalars()
-            .all()
+            (await session.execute(select(CourseMatch).where(CourseMatch.exchange_plan_id == plan.id))).scalars().all()
         )
         assert remaining_schools == []
         assert remaining_matches == []

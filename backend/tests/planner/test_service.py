@@ -96,9 +96,7 @@ async def test_course_match_crud_round_trip():
         matches = await service.list_course_matches(session, plan.id, host_school_id=school.id)
         assert any(m.id == created.id for m in matches)
 
-        updated = await service.update_course_match(
-            session, created, CourseMatchUpdate(uwaterloo_course_code="CS 341")
-        )
+        updated = await service.update_course_match(session, created, CourseMatchUpdate(uwaterloo_course_code="CS 341"))
         assert updated.uwaterloo_course_code == "CS 341"
 
         await service.delete_course_match(session, updated)

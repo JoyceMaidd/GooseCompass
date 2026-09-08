@@ -16,9 +16,7 @@ from backend.retrieval.pipeline import retrieve
 _TOP_K = 5
 
 
-async def research_lookup(
-    query: str, collection: AsyncIOMotorCollection, top_k: int = _TOP_K
-) -> list[SearchResult]:
+async def research_lookup(query: str, collection: AsyncIOMotorCollection, top_k: int = _TOP_K) -> list[SearchResult]:
     """Look up institutional documents relevant to a planner research query.
 
     Args:

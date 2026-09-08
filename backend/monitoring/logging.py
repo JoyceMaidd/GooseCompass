@@ -36,9 +36,7 @@ async def log_usage_to_db(
         output_cost_per_1m_usd: Output token price in USD per million tokens.
     """
     total_tokens = input_tokens + output_tokens
-    cost_usd = (input_tokens / 1_000_000) * input_cost_per_1m_usd + (
-        output_tokens / 1_000_000
-    ) * output_cost_per_1m_usd
+    cost_usd = (input_tokens / 1_000_000) * input_cost_per_1m_usd + (output_tokens / 1_000_000) * output_cost_per_1m_usd
 
     log_entry = UsageLog(
         user_id=user_id,
